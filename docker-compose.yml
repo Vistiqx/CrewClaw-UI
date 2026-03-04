@@ -1,0 +1,35 @@
+# ============================================================================
+# CrewClaw Mission Control - Docker Compose
+# ============================================================================
+
+version: '3.8'
+
+services:
+  mission-control:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: crewclaw-mission-control
+    ports:
+      - "3000:3000"
+    volumes:
+      - /opt/data/crewclaw/mission-control:/opt/data/crewclaw/mission-control
+      - /opt/data/assistants:/opt/data/assistants
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - MC_ENCRYPTION_KEY=${MC_ENCRYPTION_KEY}
+      - DATA_PATH=/opt/data/crewclaw/mission-control
+      - DB_PATH=/opt/data/crewclaw/mission-control/mission-control.db
+      - REGISTRY_PATH=/opt/data/crewclaw/business-registry.json
+      - DOCKER_SOCKET=/var/run/docker.sock
+      - MC_PORT=3000
+      - MC_HOST=0.0.0.0
+      - LOG_LEVEL=info
+    restart: unless-stopped
+    privileged: true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

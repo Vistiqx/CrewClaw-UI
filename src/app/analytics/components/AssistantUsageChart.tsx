@@ -1,0 +1,80 @@
+"use client";
+
+import dynamic from "next/dynamic";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Loader2 } from "lucide-react";
+import { formatNumber } from "@/lib/utils";
+
+const BarChart = dynamic(() => import("recharts").then((mod) => mod.BarChart), { ssr: false });
+const Bar = dynamic(() => import("recharts").then((mod) => mod.Bar), { ssr: false });
+const XAxis = dynamic(() => import("recharts").then((mod) => mod.XAxis), { ssr: false });
+const YAxis = dynamic(() => import("recharts").then((mod) => mod.YAxis), { ssr: false });
+const CartesianGrid = dynamic(() => import("recharts").then((mod) => mod.CartesianGrid), { ssr: false });
+const Tooltip = dynamic(() => import("recharts").then((mod) => mod.Tooltip), { ssr: false });
+const ResponsiveContainer = dynamic(() => import("recharts").then((mod) => mod.ResponsiveContainer), { ssr: false });
+
+interface AssistantUsageData {
+  assistantId: string;
+  assistantName: string;
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  cost: number;
+  percentage: number;
+}
+
+interface AssistantUsageChartProps {
+  data: AssistantUsageData[] | undefined;
+  isLoading: boolean;
+}
+
+export function AssistantUsageChart({ data, isLoading }: AssistantUsageChartProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-[var(--lavender)]">Per-Assistant Usage</CardTitle>
+        <CardDescription className="text-[var(--lavender-muted)]">
+          Token consumption by assistant
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex h-[300px] items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-[var(--tropical-indigo)]" />
+          </div>
+        ) : data?.length === 0 ? (
+          <div className="flex h-[300px] items-center justify-center text-[var(--lavender-muted)]">
+            No data available
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={(data || []).slice(0, 5)}
+              layout="vertical"
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis type="number" stroke="var(--lavender-muted)" fontSize={12} />
+              <YAxis
+                type="category"
+                dataKey="assistantName"
+                stroke="var(--lavender-muted)"
+                fontSize={12}
+                width={100}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "var(--night-light)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-md)",
+                }}
+                labelStyle={{ color: "var(--lavender)" }}
+                formatter={(value) => formatNumber(Number(value) || 0)}
+              />
+              <Bar dataKey="totalTokens" fill="var(--tropical-indigo)" name="Tokens" />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
