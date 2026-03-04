@@ -13,23 +13,41 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - /opt/data/crewclaw/ui:/opt/data/crewclaw/ui
-      - /opt/data/assistants:/opt/data/assistants
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/data/crewclaw-ui:/opt/data/crewclaw-ui
+      - /opt/data/crewclaw-assistants:/opt/data/crewclaw-assistants:rw
+      - /var/log/crewclaw:/var/log/crewclaw:ro
     environment:
       - UI_ENCRYPTION_KEY=${UI_ENCRYPTION_KEY}
-      - DATA_PATH=/opt/data/crewclaw/ui
-      - DB_PATH=/opt/data/crewclaw/ui/CrewClaw-UI.db
+      - DATA_PATH=/opt/data/crewclaw-ui
+      - DB_PATH=/opt/data/crewclaw-ui/CrewClaw-UI.db
       - REGISTRY_PATH=/opt/data/crewclaw/business-registry.json
-      - DOCKER_SOCKET=/var/run/docker.sock
+      - ASSISTANTS_DATA_PATH=/opt/data/crewclaw-assistants
       - UI_PORT=3000
       - UI_HOST=0.0.0.0
       - LOG_LEVEL=info
     restart: unless-stopped
-    privileged: true
+    networks:
+      - crewclaw-ui-network
+      - assistant-network-internal
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
+networks:
+  crewclaw-ui-network:
+    driver: bridge
+  
+  assistant-network-internal:
+    external: true
+    name: assistant-network-internal
+
+volumes:
+  crewclaw-ui-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/data/crewclaw-ui
