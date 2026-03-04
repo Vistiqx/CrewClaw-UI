@@ -148,7 +148,7 @@ sudo -u crewclaw docker-compose build
 │       └── Dockerfile
 ├── data/crewclaw/
 │   └── ui/    # Data & database
-│       ├── ui.db
+│       ├── CrewClaw-UI.db
 │       └── business-registry.json
 └── scripts/crewclaw/       # Source code
     └── ui/

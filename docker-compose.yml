@@ -19,7 +19,7 @@ services:
     environment:
       - UI_ENCRYPTION_KEY=${UI_ENCRYPTION_KEY}
       - DATA_PATH=/opt/data/crewclaw/ui
-      - DB_PATH=/opt/data/crewclaw/ui/ui.db
+      - DB_PATH=/opt/data/crewclaw/ui/CrewClaw-UI.db
       - REGISTRY_PATH=/opt/data/crewclaw/business-registry.json
       - DOCKER_SOCKET=/var/run/docker.sock
       - UI_PORT=3000

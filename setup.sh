@@ -331,7 +331,7 @@ setup_environment() {
 
     # Update data paths in .env
     sed -i "s|^DATA_PATH=.*|DATA_PATH=$DATA_DIR/ui|" "$ENV_FILE" 2>/dev/null || true
-    sed -i "s|^DB_PATH=.*|DB_PATH=$DATA_DIR/ui/ui.db|" "$ENV_FILE" 2>/dev/null || true
+    sed -i "s|^DB_PATH=.*|DB_PATH=$DATA_DIR/ui/CrewClaw-UI.db|" "$ENV_FILE" 2>/dev/null || true
     sed -i "s|^REGISTRY_PATH=.*|REGISTRY_PATH=$DATA_DIR/business-registry.json|" "$ENV_FILE" 2>/dev/null || true
 
     chown "$CREWCLAW_USER:$CREWCLAW_GROUP" "$ENV_FILE"
