@@ -1,4 +1,4 @@
-# CrewClaw Mission Control
+# CrewClaw-UI
 
 A web-based dashboard for managing CrewClaw businesses, assistants, credentials, and health monitoring.
 
@@ -8,18 +8,18 @@ A web-based dashboard for managing CrewClaw businesses, assistants, credentials,
 
 ```bash
 # 1. Clone repository (or use existing)
-git clone https://github.com/Vistiqx/CrewClaw.git /opt/scripts/crewclaw
+git clone https://github.com/Vistiqx/CrewClaw-UI.git /opt/scripts/crewclaw
 
 # 2. Run installer (requires sudo)
-cd /opt/scripts/crewclaw/mission-control
+cd /opt/scripts/crewclaw/ui
 sudo bash ./setup.sh
 
 # 3. Follow the on-screen instructions
 #    - Read the warning and type "I UNDERSTAND"
 #    - Script will create user, directories, and install dependencies
 
-# 4. Start Mission Control
-cd /opt/scripts/crewclaw/mission-control
+# 4. Start CrewClaw-UI
+cd /opt/scripts/crewclaw/ui
 sudo -u crewclaw npm run dev
 ```
 
@@ -43,7 +43,7 @@ Then open http://localhost:3000
 ### Automated Installation
 
 ```bash
-cd /opt/scripts/crewclaw/mission-control
+cd /opt/scripts/crewclaw/ui
 sudo ./setup.sh
 ```
 
@@ -60,12 +60,12 @@ The setup script will:
 
 ```bash
 # Create directories
-sudo mkdir -p /opt/data/crewclaw/mission-control
-sudo mkdir -p /opt/docker/crewclaw/mission-control
+sudo mkdir -p /opt/data/crewclaw/ui
+sudo mkdir -p /opt/docker/crewclaw/ui
 
 # Clone repository
-git clone https://github.com/Vistiqx/CrewClaw.git /opt/scripts/crewclaw
-cd /opt/scripts/crewclaw/mission-control
+git clone https://github.com/Vistiqx/CrewClaw-UI.git /opt/scripts/crewclaw
+cd /opt/scripts/crewclaw/ui
 
 # Create .env file
 cp .env.example .env
@@ -86,12 +86,12 @@ npm run dev
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `MC_ENCRYPTION_KEY` | Encryption key for credentials (32 hex chars) | Yes |
+| `UI_ENCRYPTION_KEY` | Encryption key for credentials (32 hex chars) | Yes |
 | `DATA_PATH` | Path to data directory | Auto |
 | `DB_PATH` | Path to SQLite database | Auto |
 | `REGISTRY_PATH` | Path to business registry JSON | Auto |
-| `MC_PORT` | Port for web interface (default: 3000) | No |
-| `MC_HOST` | Host to bind to (default: 0.0.0.0) | No |
+| `UI_PORT` | Port for web interface (default: 3000) | No |
+| `UI_HOST` | Host to bind to (default: 0.0.0.0) | No |
 | `LOG_LEVEL` | Log level (debug, info, warn, error) | No |
 
 ### Generating a New Encryption Key
@@ -107,14 +107,14 @@ openssl rand -hex 32
 ### Development Mode (Node.js)
 
 ```bash
-cd /opt/scripts/crewclaw/mission-control
+cd /opt/scripts/crewclaw/ui
 sudo -u crewclaw npm run dev
 ```
 
 ### Production Mode (Docker)
 
 ```bash
-cd /opt/docker/crewclaw/mission-control
+cd /opt/docker/crewclaw/ui
 sudo -u crewclaw docker-compose up -d
 ```
 
@@ -143,15 +143,15 @@ sudo -u crewclaw docker-compose build
 ```
 /opt/
 ├── docker/crewclaw/
-│   └── mission-control/     # Docker configs
+│   └── ui/     # Docker configs
 │       ├── docker-compose.yml
 │       └── Dockerfile
 ├── data/crewclaw/
-│   └── mission-control/    # Data & database
-│       ├── mission-control.db
+│   └── ui/    # Data & database
+│       ├── ui.db
 │       └── business-registry.json
 └── scripts/crewclaw/       # Source code
-    └── mission-control/
+    └── ui/
         ├── src/
         ├── package.json
         ├── .env
@@ -179,7 +179,7 @@ If port 3000 is already in use:
 sudo lsof -i :3000
 
 # Change port in .env
-MC_PORT=3001
+UI_PORT=3001
 ```
 
 ### Database Errors
@@ -187,7 +187,7 @@ MC_PORT=3001
 Check that the data directory exists and has correct permissions:
 
 ```bash
-ls -la /opt/data/crewclaw/mission-control/
+ls -la /opt/data/crewclaw/ui/
 sudo chown -R crewclaw:crewclaw /opt/data/crewclaw/
 ```
 

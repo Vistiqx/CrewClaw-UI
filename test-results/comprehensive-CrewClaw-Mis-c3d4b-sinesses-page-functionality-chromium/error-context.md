@@ -1,0 +1,165 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e5]: CrewClaw
+      - button "Collapse sidebar" [ref=e7]:
+        - img [ref=e8]
+      - navigation [ref=e10]:
+        - list [ref=e11]:
+          - listitem [ref=e12]:
+            - link "Dashboard" [ref=e13] [cursor=pointer]:
+              - /url: /
+              - img [ref=e14]
+              - generic [ref=e19]: Dashboard
+          - listitem [ref=e20]:
+            - link "Businesses" [ref=e21] [cursor=pointer]:
+              - /url: /businesses
+              - img [ref=e22]
+              - generic [ref=e26]: Businesses
+          - listitem [ref=e27]:
+            - link "Assistants" [ref=e28] [cursor=pointer]:
+              - /url: /assistants
+              - img [ref=e29]
+              - generic [ref=e32]: Assistants
+          - listitem [ref=e33]:
+            - link "Tasks" [ref=e34] [cursor=pointer]:
+              - /url: /tasks
+              - img [ref=e35]
+              - generic [ref=e38]: Tasks
+          - listitem [ref=e39]:
+            - link "Audit Logs" [ref=e40] [cursor=pointer]:
+              - /url: /audit-logs
+              - img [ref=e41]
+              - generic [ref=e43]: Audit Logs
+          - listitem [ref=e44]:
+            - link "Credentials" [ref=e45] [cursor=pointer]:
+              - /url: /credentials
+              - img [ref=e46]
+              - generic [ref=e50]: Credentials
+          - listitem [ref=e51]:
+            - link "Analytics" [ref=e52] [cursor=pointer]:
+              - /url: /analytics
+              - img [ref=e53]
+              - generic [ref=e55]: Analytics
+          - listitem [ref=e56]:
+            - link "Heartbeats" [ref=e57] [cursor=pointer]:
+              - /url: /scheduler
+              - img [ref=e58]
+              - generic [ref=e61]: Heartbeats
+          - listitem [ref=e62]:
+            - link "CRON Jobs" [ref=e63] [cursor=pointer]:
+              - /url: /cron-jobs
+              - img [ref=e64]
+              - generic [ref=e66]: CRON Jobs
+          - listitem [ref=e67]:
+            - link "Skills" [ref=e68] [cursor=pointer]:
+              - /url: /skills
+              - img [ref=e69]
+              - generic [ref=e71]: Skills
+          - listitem [ref=e72]:
+            - link "Plugins" [ref=e73] [cursor=pointer]:
+              - /url: /plugins
+              - img [ref=e74]
+              - generic [ref=e76]: Plugins
+          - listitem [ref=e77]:
+            - link "Tools" [ref=e78] [cursor=pointer]:
+              - /url: /tools
+              - img [ref=e79]
+              - generic [ref=e83]: Tools
+          - listitem [ref=e84]:
+            - link "Commands" [ref=e85] [cursor=pointer]:
+              - /url: /commands
+              - img [ref=e86]
+              - generic [ref=e88]: Commands
+          - listitem [ref=e89]:
+            - link "Health" [ref=e90] [cursor=pointer]:
+              - /url: /health
+              - img [ref=e91]
+              - generic [ref=e93]: Health
+      - link "Settings" [ref=e95] [cursor=pointer]:
+        - /url: /settings
+        - img [ref=e96]
+        - generic [ref=e99]: Settings
+    - banner [ref=e100]
+    - main [ref=e101]:
+      - generic [ref=e103]:
+        - generic [ref=e104]:
+          - generic [ref=e105]:
+            - img [ref=e106]
+            - heading "Businesses" [level=1] [ref=e110]
+          - button "Add Business" [ref=e111]
+        - generic [ref=e114]:
+          - generic [ref=e115]:
+            - generic [ref=e117]:
+              - heading "abc" [level=3] [ref=e118]
+              - generic [ref=e119]:
+                - button "Edit" [ref=e120]:
+                  - generic [ref=e121]: Edit
+                - button "Delete" [ref=e122]:
+                  - generic [ref=e123]: Delete
+                - generic [ref=e124]: active
+            - generic [ref=e126]:
+              - generic [ref=e127]:
+                - generic [ref=e128]: "Prefix:"
+                - generic [ref=e129]: ABC
+              - generic [ref=e130]:
+                - generic [ref=e131]: "Industry:"
+                - generic [ref=e132]: Technology
+              - generic [ref=e133]:
+                - generic [ref=e134]: "Type:"
+                - generic [ref=e135]: primary
+          - generic [ref=e136]:
+            - generic [ref=e138]:
+              - heading "HealthFirst Medical" [level=3] [ref=e139]
+              - generic [ref=e140]:
+                - button "Edit" [ref=e141]:
+                  - generic [ref=e142]: Edit
+                - button "Delete" [ref=e143]:
+                  - generic [ref=e144]: Delete
+                - generic [ref=e145]: inactive
+            - generic [ref=e147]:
+              - generic [ref=e148]:
+                - generic [ref=e149]: "Prefix:"
+                - generic [ref=e150]: HFM
+              - generic [ref=e151]:
+                - generic [ref=e152]: "Industry:"
+                - generic [ref=e153]: Healthcare
+          - generic [ref=e154]:
+            - generic [ref=e156]:
+              - heading "Global Finance Inc" [level=3] [ref=e157]
+              - generic [ref=e158]:
+                - button "Edit" [ref=e159]:
+                  - generic [ref=e160]: Edit
+                - button "Delete" [ref=e161]:
+                  - generic [ref=e162]: Delete
+                - generic [ref=e163]: active
+            - generic [ref=e165]:
+              - generic [ref=e166]:
+                - generic [ref=e167]: "Prefix:"
+                - generic [ref=e168]: GFI
+              - generic [ref=e169]:
+                - generic [ref=e170]: "Industry:"
+                - generic [ref=e171]: Finance
+          - generic [ref=e172]:
+            - generic [ref=e174]:
+              - heading "Acme Corporation" [level=3] [ref=e175]
+              - generic [ref=e176]:
+                - button "Edit" [ref=e177]:
+                  - generic [ref=e178]: Edit
+                - button "Delete" [ref=e179]:
+                  - generic [ref=e180]: Delete
+                - generic [ref=e181]: active
+            - generic [ref=e183]:
+              - generic [ref=e184]:
+                - generic [ref=e185]: "Prefix:"
+                - generic [ref=e186]: ACME
+              - generic [ref=e187]:
+                - generic [ref=e188]: "Industry:"
+                - generic [ref=e189]: Technology
+  - region "Notifications (F8)":
+    - list
+  - alert [ref=e190]
+```

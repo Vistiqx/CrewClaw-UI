@@ -1,0 +1,189 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e5]: CrewClaw
+      - button "Collapse sidebar" [ref=e7]:
+        - img [ref=e8]
+      - navigation [ref=e10]:
+        - list [ref=e11]:
+          - listitem [ref=e12]:
+            - link "Dashboard" [ref=e13] [cursor=pointer]:
+              - /url: /
+              - img [ref=e14]
+              - generic [ref=e19]: Dashboard
+          - listitem [ref=e20]:
+            - link "Businesses" [ref=e21] [cursor=pointer]:
+              - /url: /businesses
+              - img [ref=e22]
+              - generic [ref=e26]: Businesses
+          - listitem [ref=e27]:
+            - link "Assistants" [ref=e28] [cursor=pointer]:
+              - /url: /assistants
+              - img [ref=e29]
+              - generic [ref=e32]: Assistants
+          - listitem [ref=e33]:
+            - link "Tasks" [ref=e34] [cursor=pointer]:
+              - /url: /tasks
+              - img [ref=e35]
+              - generic [ref=e38]: Tasks
+          - listitem [ref=e39]:
+            - link "Audit Logs" [ref=e40] [cursor=pointer]:
+              - /url: /audit-logs
+              - img [ref=e41]
+              - generic [ref=e43]: Audit Logs
+          - listitem [ref=e44]:
+            - link "Credentials" [ref=e45] [cursor=pointer]:
+              - /url: /credentials
+              - img [ref=e46]
+              - generic [ref=e50]: Credentials
+          - listitem [ref=e51]:
+            - link "Analytics" [ref=e52] [cursor=pointer]:
+              - /url: /analytics
+              - img [ref=e53]
+              - generic [ref=e55]: Analytics
+          - listitem [ref=e56]:
+            - link "Heartbeats" [ref=e57] [cursor=pointer]:
+              - /url: /scheduler
+              - img [ref=e58]
+              - generic [ref=e61]: Heartbeats
+          - listitem [ref=e62]:
+            - link "CRON Jobs" [ref=e63] [cursor=pointer]:
+              - /url: /cron-jobs
+              - img [ref=e64]
+              - generic [ref=e66]: CRON Jobs
+          - listitem [ref=e67]:
+            - link "Skills" [ref=e68] [cursor=pointer]:
+              - /url: /skills
+              - img [ref=e69]
+              - generic [ref=e71]: Skills
+          - listitem [ref=e72]:
+            - link "Plugins" [ref=e73] [cursor=pointer]:
+              - /url: /plugins
+              - img [ref=e74]
+              - generic [ref=e76]: Plugins
+          - listitem [ref=e77]:
+            - link "Tools" [ref=e78] [cursor=pointer]:
+              - /url: /tools
+              - img [ref=e79]
+              - generic [ref=e83]: Tools
+          - listitem [ref=e84]:
+            - link "Commands" [ref=e85] [cursor=pointer]:
+              - /url: /commands
+              - img [ref=e86]
+              - generic [ref=e88]: Commands
+          - listitem [ref=e89]:
+            - link "Health" [ref=e90] [cursor=pointer]:
+              - /url: /health
+              - img [ref=e91]
+              - generic [ref=e93]: Health
+      - link "Settings" [ref=e95] [cursor=pointer]:
+        - /url: /settings
+        - img [ref=e96]
+        - generic [ref=e99]: Settings
+    - banner [ref=e100]
+    - main [ref=e101]:
+      - generic [ref=e103]:
+        - generic [ref=e104]:
+          - heading "System Health" [level=3] [ref=e106]
+          - generic [ref=e108]:
+            - generic [ref=e109]:
+              - generic [ref=e110]:
+                - img [ref=e111]
+                - generic [ref=e115]: 1%
+              - generic [ref=e116]: CPU
+            - generic [ref=e117]:
+              - generic [ref=e118]:
+                - img [ref=e119]
+                - generic [ref=e123]: 6%
+              - generic [ref=e124]: RAM
+            - generic [ref=e125]:
+              - generic [ref=e126]:
+                - img [ref=e127]
+                - generic [ref=e131]: 81%
+              - generic [ref=e132]: Disk
+            - generic [ref=e133]:
+              - generic [ref=e134]:
+                - img [ref=e135]
+                - generic [ref=e139]: 38%
+              - generic [ref=e140]: Temp (°C)
+            - generic [ref=e141]:
+              - generic [ref=e142]: 1d 20h 59m
+              - generic [ref=e143]: Uptime
+        - generic [ref=e144]:
+          - heading "Active Sessions" [level=3] [ref=e146]
+          - table [ref=e149]:
+            - rowgroup [ref=e150]:
+              - row "Name Business Channel Status" [ref=e151]:
+                - columnheader "Name" [ref=e152]
+                - columnheader "Business" [ref=e153]
+                - columnheader "Channel" [ref=e154]
+                - columnheader "Status" [ref=e155]
+            - rowgroup [ref=e156]:
+              - row "ABC-chief-of-staff-1 biz_1772463478641 telegram stopped" [ref=e157]:
+                - cell "ABC-chief-of-staff-1" [ref=e158]
+                - cell "biz_1772463478641" [ref=e159]
+                - cell "telegram" [ref=e160]
+                - cell "stopped" [ref=e161]
+        - generic [ref=e162]:
+          - heading "Task Summary" [level=3] [ref=e164]
+          - generic [ref=e166]:
+            - generic [ref=e167]:
+              - generic [ref=e168]: "1"
+              - generic [ref=e169]: planning
+            - generic [ref=e170]:
+              - generic [ref=e171]: "0"
+              - generic [ref=e172]: inbox
+            - generic [ref=e173]:
+              - generic [ref=e174]: "1"
+              - generic [ref=e175]: assigned
+            - generic [ref=e176]:
+              - generic [ref=e177]: "0"
+              - generic [ref=e178]: in progress
+            - generic [ref=e179]:
+              - generic [ref=e180]: "0"
+              - generic [ref=e181]: testing
+            - generic [ref=e182]:
+              - generic [ref=e183]: "0"
+              - generic [ref=e184]: review
+            - generic [ref=e185]:
+              - generic [ref=e186]: "0"
+              - generic [ref=e187]: done
+        - generic [ref=e191]:
+          - generic [ref=e192]:
+            - heading "Total Businesses" [level=3] [ref=e194]
+            - generic [ref=e196]: "4"
+          - generic [ref=e197]:
+            - heading "Total Assistants" [level=3] [ref=e199]
+            - generic [ref=e201]: "1"
+          - generic [ref=e202]:
+            - heading "Running Assistants" [level=3] [ref=e204]
+            - generic [ref=e206]: "1"
+          - generic [ref=e207]:
+            - heading "Active Today" [level=3] [ref=e209]
+            - generic [ref=e211]: "0"
+        - generic [ref=e212]:
+          - heading "Live Activity" [level=3] [ref=e214]
+          - generic [ref=e216]:
+            - generic [ref=e217]:
+              - generic [ref=e218]:
+                - button "Pause streaming" [ref=e219]:
+                  - img [ref=e220]
+                - button "Clear logs" [ref=e223]:
+                  - img [ref=e224]
+              - generic [ref=e227]:
+                - img [ref=e228]
+                - textbox "Search logs..." [ref=e231]
+              - generic [ref=e232]:
+                - img [ref=e233]
+                - combobox [ref=e235]:
+                  - generic: All
+                  - img [ref=e236]
+              - generic [ref=e238]: 0 / 0 lines
+            - generic [ref=e240]: Waiting for logs...
+  - region "Notifications (F8)":
+    - list
+  - alert [ref=e241]
+```

@@ -16,8 +16,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CrewClaw Mission Control",
-  description: "CrewClaw Mission Control - Manage your businesses, assistants, and workflows",
+  title: "CrewClaw-UI",
+  description: "CrewClaw-UI - Manage your businesses, assistants, and workflows",
 };
 
 export default function RootLayout({

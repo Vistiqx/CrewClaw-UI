@@ -10,7 +10,7 @@ async function takeScreenshot(page, name) {
   console.log(`Screenshot: ${name}.png`);
 }
 
-test.describe('CrewClaw Mission Control - Comprehensive Test Suite', () => {
+test.describe('CrewClaw-UI - Comprehensive Test Suite', () => {
   
   test('Dashboard loads correctly', async ({ page }) => {
     const errors = [];
@@ -22,7 +22,7 @@ test.describe('CrewClaw Mission Control - Comprehensive Test Suite', () => {
     await page.waitForLoadState('networkidle');
     await takeScreenshot(page, '01-dashboard-initial-load');
     
-    await expect(page).toHaveTitle(/CrewClaw Mission Control/);
+    await expect(page).toHaveTitle(/CrewClaw-UI/);
     await expect(page.locator('text=System Health')).toBeVisible();
     await expect(page.locator('text=Total Businesses')).toBeVisible();
     await expect(page.locator('text=Total Assistants')).toBeVisible();

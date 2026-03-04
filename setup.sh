@@ -2,9 +2,9 @@
 set -e
 
 # =============================================================================
-# CrewClaw Mission Control - Setup Script
+# CrewClaw-UI - Setup Script
 # =============================================================================
-# This script installs CrewClaw Mission Control and Framework.
+# This script installs CrewClaw-UI and Framework.
 # It creates a dedicated 'crewclaw' user and sets up the directory structure.
 #
 # Usage:
@@ -231,8 +231,8 @@ create_directories() {
     log_step "Creating directory structure..."
 
     # Create base directories
-    mkdir -p "$DATA_DIR/mission-control"
-    mkdir -p "$DOCKER_DIR/mission-control"
+    mkdir -p "$DATA_DIR/ui"
+    mkdir -p "$DOCKER_DIR/ui"
     mkdir -p "$INSTALL_DIR"
 
     log_info "Created: $DATA_DIR"
@@ -297,8 +297,8 @@ clone_repository() {
 setup_environment() {
     log_step "Setting up environment..."
 
-    ENV_FILE="$INSTALL_DIR/mission-control/.env"
-    ENV_EXAMPLE="$INSTALL_DIR/mission-control/.env.example"
+    ENV_FILE="$INSTALL_DIR/ui/.env"
+    ENV_EXAMPLE="$INSTALL_DIR/ui/.env.example"
 
     # Create .env from example if it doesn't exist
     if [ ! -f "$ENV_FILE" ]; then
@@ -314,24 +314,24 @@ setup_environment() {
     fi
 
     # Generate encryption key if empty
-    if grep -q "^MC_ENCRYPTION_KEY=$" "$ENV_FILE" || ! grep -q "^MC_ENCRYPTION_KEY=" "$ENV_FILE"; then
+    if grep -q "^UI_ENCRYPTION_KEY=$" "$ENV_FILE" || ! grep -q "^UI_ENCRYPTION_KEY=" "$ENV_FILE"; then
         ENCRYPTION_KEY=$(openssl rand -hex 32 2>/dev/null)
         if [ -n "$ENCRYPTION_KEY" ]; then
             # Add or update the key
-            if grep -q "^MC_ENCRYPTION_KEY=" "$ENV_FILE"; then
-                sed -i "s|^MC_ENCRYPTION_KEY=.*|MC_ENCRYPTION_KEY=$ENCRYPTION_KEY|" "$ENV_FILE"
+            if grep -q "^UI_ENCRYPTION_KEY=" "$ENV_FILE"; then
+                sed -i "s|^UI_ENCRYPTION_KEY=.*|UI_ENCRYPTION_KEY=$ENCRYPTION_KEY|" "$ENV_FILE"
             else
-                echo "MC_ENCRYPTION_KEY=$ENCRYPTION_KEY" >> "$ENV_FILE"
+                echo "UI_ENCRYPTION_KEY=$ENCRYPTION_KEY" >> "$ENV_FILE"
             fi
-            log_info "Generated MC_ENCRYPTION_KEY"
+            log_info "Generated UI_ENCRYPTION_KEY"
         else
-            log_warn "Could not generate encryption key. Please set MC_ENCRYPTION_KEY manually."
+            log_warn "Could not generate encryption key. Please set UI_ENCRYPTION_KEY manually."
         fi
     fi
 
     # Update data paths in .env
-    sed -i "s|^DATA_PATH=.*|DATA_PATH=$DATA_DIR/mission-control|" "$ENV_FILE" 2>/dev/null || true
-    sed -i "s|^DB_PATH=.*|DB_PATH=$DATA_DIR/mission-control/mission-control.db|" "$ENV_FILE" 2>/dev/null || true
+    sed -i "s|^DATA_PATH=.*|DATA_PATH=$DATA_DIR/ui|" "$ENV_FILE" 2>/dev/null || true
+    sed -i "s|^DB_PATH=.*|DB_PATH=$DATA_DIR/ui/ui.db|" "$ENV_FILE" 2>/dev/null || true
     sed -i "s|^REGISTRY_PATH=.*|REGISTRY_PATH=$DATA_DIR/business-registry.json|" "$ENV_FILE" 2>/dev/null || true
 
     chown "$CREWCLAW_USER:$CREWCLAW_GROUP" "$ENV_FILE"
@@ -346,7 +346,7 @@ setup_environment() {
 install_dependencies() {
     log_step "Installing dependencies..."
 
-    cd "$INSTALL_DIR/mission-control"
+    cd "$INSTALL_DIR/ui"
 
     # Clean up any existing node_modules to ensure fresh install
     log_info "Cleaning up existing dependencies..."
@@ -373,7 +373,7 @@ install_dependencies() {
 
     # Ensure ownership is correct
     log_info "Setting ownership..."
-    chown -R "$CREWCLAW_USER:$CREWCLAW_GROUP" "$INSTALL_DIR/mission-control"
+    chown -R "$CREWCLAW_USER:$CREWCLAW_GROUP" "$INSTALL_DIR/ui"
 
     # Pre-create .next directory structure to avoid permission issues
     log_info "Creating .next directory..."
@@ -392,17 +392,17 @@ copy_docker_files() {
     log_step "Setting up Docker configurations..."
 
     # Copy docker-compose.yml to data directory
-    if [ -f "$INSTALL_DIR/mission-control/docker-compose.yml" ]; then
-        cp "$INSTALL_DIR/mission-control/docker-compose.yml" "$DOCKER_DIR/mission-control/"
-        chown "$CREWCLAW_USER:$CREWCLAW_GROUP" "$DOCKER_DIR/mission-control/docker-compose.yml"
-        log_info "Copied docker-compose.yml to $DOCKER_DIR/mission-control/"
+    if [ -f "$INSTALL_DIR/ui/docker-compose.yml" ]; then
+        cp "$INSTALL_DIR/ui/docker-compose.yml" "$DOCKER_DIR/ui/"
+        chown "$CREWCLAW_USER:$CREWCLAW_GROUP" "$DOCKER_DIR/ui/docker-compose.yml"
+        log_info "Copied docker-compose.yml to $DOCKER_DIR/ui/"
     fi
 
     # Copy Dockerfile if exists
-    if [ -f "$INSTALL_DIR/mission-control/Dockerfile" ]; then
-        cp "$INSTALL_DIR/mission-control/Dockerfile" "$DOCKER_DIR/mission-control/"
-        chown "$CREWCLAW_USER:$CREWCLAW_GROUP" "$DOCKER_DIR/mission-control/Dockerfile"
-        log_info "Copied Dockerfile to $DOCKER_DIR/mission-control/"
+    if [ -f "$INSTALL_DIR/ui/Dockerfile" ]; then
+        cp "$INSTALL_DIR/ui/Dockerfile" "$DOCKER_DIR/ui/"
+        chown "$CREWCLAW_USER:$CREWCLAW_GROUP" "$DOCKER_DIR/ui/Dockerfile"
+        log_info "Copied Dockerfile to $DOCKER_DIR/ui/"
     fi
 
     log_success "Docker files configured!"
@@ -421,17 +421,17 @@ print_next_steps() {
     echo -e "${BOLD}Next steps:${NC}"
     echo
     echo -e "  1. ${YELLOW}Edit environment variables (optional):${NC}"
-    echo -e "     nano $INSTALL_DIR/mission-control/.env"
+    echo -e "     nano $INSTALL_DIR/ui/.env"
     echo
-    echo -e "  2. ${YELLOW}Start Mission Control (Development):${NC}"
-    echo -e "     cd $INSTALL_DIR/mission-control"
+    echo -e "  2. ${YELLOW}Start CrewClaw-UI (Development):${NC}"
+    echo -e "     cd $INSTALL_DIR/ui"
     echo -e "     npm run dev"
     echo
-    echo -e "  3. ${YELLOW}Start Mission Control (Production - Docker):${NC}"
-    echo -e "     cd $DOCKER_DIR/mission-control"
+    echo -e "  3. ${YELLOW}Start CrewClaw-UI (Production - Docker):${NC}"
+    echo -e "     cd $DOCKER_DIR/ui"
     echo -e "     sudo -u $CREWCLAW_USER docker-compose up -d"
     echo
-    echo -e "  4. ${YELLOW}Access Mission Control:${NC}"
+    echo -e "  4. ${YELLOW}Access CrewClaw-UI:${NC}"
     echo -e "     http://localhost:3000"
     echo
     echo -e "${BOLD}Useful commands:${NC}"
@@ -442,10 +442,10 @@ print_next_steps() {
     echo
     echo -e "${BOLD}File locations:${NC}"
     echo
-    echo -e "  Source code:   $INSTALL_DIR/mission-control/"
-    echo -e "  Docker config: $DOCKER_DIR/mission-control/"
-    echo -e "  Data:          $DATA_DIR/mission-control/"
-    echo -e "  Environment:   $INSTALL_DIR/mission-control/.env"
+    echo -e "  Source code:   $INSTALL_DIR/ui/"
+    echo -e "  Docker config: $DOCKER_DIR/ui/"
+    echo -e "  Data:          $DATA_DIR/ui/"
+    echo -e "  Environment:   $INSTALL_DIR/ui/.env"
     echo
     echo -e "${GREEN}══════════════════════════════════════════════════════════════════════${NC}"
     echo
@@ -498,7 +498,7 @@ main() {
     echo
     echo -e "${CYAN}╔══════════════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${CYAN}║                                                                      ║${NC}"
-    echo -e "${CYAN}║              ${BOLD}CrewClaw Mission Control Installer${CYAN}                    ║${NC}"
+    echo -e "${CYAN}║                 ${BOLD}CrewClaw-UI Installer${CYAN}                       ║${NC}}"
     echo -e "${CYAN}║                                                                      ║${NC}"
     echo -e "${CYAN}╚══════════════════════════════════════════════════════════════════════╝${NC}"
     echo

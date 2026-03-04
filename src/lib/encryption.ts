@@ -7,13 +7,13 @@ const KEY_LENGTH = 32;
 const ITERATIONS = 100000;
 
 function getEncryptionKey(): Buffer {
-  const encryptionKey = process.env.MC_ENCRYPTION_KEY;
+  const encryptionKey = process.env.UI_ENCRYPTION_KEY;
   
   if (!encryptionKey) {
-    throw new Error("MC_ENCRYPTION_KEY environment variable is not set");
+    throw new Error("UI_ENCRYPTION_KEY environment variable is not set");
   }
 
-  const salt = crypto.createHash("sha256").update("mission-control-credential-salt").digest();
+  const salt = crypto.createHash("sha256").update("crewclaw-ui-credential-salt").digest();
   
   return crypto.pbkdf2Sync(encryptionKey, salt, ITERATIONS, KEY_LENGTH, "sha256");
 }
