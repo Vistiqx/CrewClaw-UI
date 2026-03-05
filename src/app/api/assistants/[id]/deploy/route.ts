@@ -52,7 +52,7 @@ async function ensureImageExists(docker: any): Promise<void> {
     // Find the framework directory
     const possiblePaths = [
       "/opt/docker/assistants/_framework",
-      "/opt/scripts/crewclaw/CrewClaw/framework-templates",
+      "/opt/scripts/crewclaw-core/framework-templates",
       path.join(process.cwd(), "../../framework-templates"),
     ];
 
@@ -147,7 +147,8 @@ async function deployContainer(assistant: any): Promise<string> {
   const businessPrefix = business.prefix;
   if (!businessPrefix || businessPrefix.length !== 3) {
     throw new Error(
-      `Invalid business prefix: ${businessPrefix}. Must be exactly 3 characters.`n    );
+      `Invalid business prefix: ${businessPrefix}. Must be exactly 3 characters.`
+    );
   }
 
   // Generate container name: XXX-assistant-name
@@ -274,7 +275,7 @@ export async function POST(
       const containerId = await deployContainer(assistant);
       
       // Get the business prefix for the container name
-      const business = getBusinessById(assistant.business_id);
+      const business = getBusinessById(parseInt(assistant.business_id as string));
       const containerName = generateContainerName(business?.prefix || "unk", assistant.name);
       
       updateAssistant(parseInt(id), { 

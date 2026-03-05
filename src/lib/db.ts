@@ -43,7 +43,7 @@ function initDb(database: Database.Database): void {
   // Try multiple possible locations
   const possiblePaths = [
     process.env.REGISTRY_PATH,
-    "/opt/data/crewclaw/business-registry.json",
+    "/opt/data/crewclaw-ui/business-registry.json",
     path.join(process.cwd(), "..", "..", "data", "crewclaw", "business-registry.json"),
     path.join(process.cwd(), "data", "business-registry.json"),
   ];

@@ -14,6 +14,10 @@ const buttonVariants = cva(
           "bg-[var(--ultra-violet)] text-[var(--lavender)] hover:bg-[var(--amethyst)] border border-[var(--border)]",
         ghost:
           "text-[var(--lavender)] hover:bg-[var(--night-lighter)]",
+        outline:
+          "border border-[var(--border)] bg-transparent text-[var(--lavender)] hover:bg-[var(--night-lighter)]",
+        destructive:
+          "bg-[var(--error)] text-[var(--night)] hover:bg-[var(--error)]/90",
       },
       size: {
         default: "h-10 px-4 py-2",
