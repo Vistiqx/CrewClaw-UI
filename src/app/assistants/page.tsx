@@ -463,7 +463,7 @@ export default function AssistantsPage() {
               <Input
                 placeholder={`${getSelectedBusinessPrefix()}-my-assistant`}
                 value={newAssistant.name}
-                onChange={(e) => dispatch({ type: "SET_NEW_ASSISTANT", payload: { name: e.target.value } })}
+                onChange={(e) => dispatch({ type: "SET_NEW_ASSISTANT", payload: { name: e.target.value.replace(/\s+/g, '-') } })}
               />
             </div>
 
