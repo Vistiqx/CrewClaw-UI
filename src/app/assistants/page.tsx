@@ -4,6 +4,7 @@ import { useEffect, useReducer, useState } from "react";
 import Link from "next/link";
 import { Plus, Search, MoreVertical, Play, Square, RotateCcw, Trash2, FileText, Settings, Edit3 } from "lucide-react";
 import { EditFileModal } from "./components/EditFileModal";
+import { ChannelEditModal } from "./components/ChannelEditModal";
 import {
   Table,
   TableHeader,
@@ -392,7 +393,7 @@ export default function AssistantsPage() {
                     </TableCell>
                     <TableCell>{getStatusBadge(assistant.status)}</TableCell>
                     <TableCell className="text-right">
-                      <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-2">
                         <div className="flex justify-end gap-1">
                           {["SOUL", "AGENTS", "IDENTITY", "MEMORY"].map((file) => (
                             <Button
@@ -416,6 +417,25 @@ export default function AssistantsPage() {
                               {file}
                             </Button>
                           ))}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 px-2 text-xs"
+                            onClick={() =>
+                              dispatch({
+                                type: "OPEN_CHANNEL_EDIT_MODAL",
+                                payload: {
+                                  assistantId: assistant.id,
+                                  assistantName: assistant.name,
+                                  currentChannels: assistant.channels || [],
+                                },
+                              })
+                            }
+                            title="Edit Channels"
+                          >
+                            <Settings className="h-3 w-3 mr-1" />
+                            Channels
+                          </Button>
                         </div>
                         <div className="flex justify-end gap-1">
                           {["TOOLS", "HEARTBEAT", "USER"].map((file) => (
@@ -548,6 +568,25 @@ export default function AssistantsPage() {
         assistantId={state.editModal.assistantId}
         assistantName={state.editModal.assistantName}
         fileName={state.editModal.fileName}
+      />
+
+      <ChannelEditModal
+        isOpen={state.channelEditModal.isOpen}
+        onClose={() => dispatch({ type: "CLOSE_CHANNEL_EDIT_MODAL" })}
+        assistantId={state.channelEditModal.assistantId}
+        assistantName={state.channelEditModal.assistantName}
+        currentChannels={state.channelEditModal.currentChannels}
+        onSave={(channels) => {
+          // Update the assistant in the list
+          dispatch({
+            type: "SET_ASSISTANTS",
+            payload: assistants.map((a) =>
+              a.id === state.channelEditModal.assistantId
+                ? { ...a, channels }
+                : a
+            ),
+          });
+        }}
       />
     </div>
   );
