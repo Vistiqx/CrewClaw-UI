@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { getDb, createAssistant, type Channel } from "@/lib/db";
+import { getAssistantBasePath } from "@/lib/path-utils";
+import fs from "fs";
+import path from "path";
 
 export async function GET(
   request: Request,
@@ -19,6 +22,7 @@ export async function POST(
 ) {
   try {
     const { id: businessId } = await params;
+    const db = getDb();
     
     const body = await request.json();
     const { name, channel, role, channels } = body;
@@ -39,6 +43,15 @@ export async function POST(
       );
     }
     
+    // Get business info for directory creation
+    const business = db.prepare("SELECT * FROM businesses WHERE id = ?").get(businessId) as any;
+    if (!business) {
+      return NextResponse.json(
+        { error: "Business not found" },
+        { status: 404 }
+      );
+    }
+    
     const assistant = createAssistant({ 
       name, 
       business_id: businessId, 
@@ -46,6 +59,23 @@ export async function POST(
       role,
       channels: channels || [primaryChannel],
     });
+    
+    // Create directory structure for the assistant
+    const { getAssistantBasePath } = await import("@/lib/path-utils");
+    const assistantBasePath = getAssistantBasePath(business.prefix, business.name, assistant.name);
+    
+    // Create workspace, config, and logs directories
+    const workspacePath = path.join(assistantBasePath, "workspace");
+    const configPath = path.join(assistantBasePath, "config");
+    const logsPath = path.join(assistantBasePath, "logs");
+    
+    [workspacePath, configPath, logsPath].forEach((dir) => {
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+    });
+    
+    console.log(`✓ Created assistant directories at: ${assistantBasePath}`);
     
     const withChannels = {
       ...assistant,
