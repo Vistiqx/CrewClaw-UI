@@ -9,7 +9,6 @@ import {
   Users,
   UsersRound,
   Bot,
-
   Calendar,
   FolderKanban,
   ListTodo,
@@ -110,8 +109,8 @@ const navSections: NavSection[] = [
     ],
   },
   {
-    id: "intelligence",
-    title: "Intelligence Layer",
+    id: "knowledge",
+    title: "Knowledge",
     icon: Brain,
     items: [
       { href: "/memory", label: "Memory", icon: Brain },
@@ -123,8 +122,8 @@ const navSections: NavSection[] = [
     ],
   },
   {
-    id: "capabilities",
-    title: "Capabilities & Extensions",
+    id: "extensions",
+    title: "Extensions",
     icon: Wrench,
     items: [
       { href: "/tools-registry", label: "Tools Registry", icon: Wrench },
@@ -137,8 +136,8 @@ const navSections: NavSection[] = [
     ],
   },
   {
-    id: "monitoring",
-    title: "Monitoring & Observability",
+    id: "operations",
+    title: "Operations",
     icon: Activity,
     items: [
       { href: "/scheduler", label: "Heartbeats", icon: Activity },
@@ -152,25 +151,39 @@ const navSections: NavSection[] = [
   },
   {
     id: "security",
-    title: "Security & Infrastructure",
+    title: "Security",
     icon: Lock,
     items: [
       { href: "/secrets-vault", label: "Secrets Vault", icon: Lock },
       { href: "/api-keys", label: "API Keys", icon: Key },
-      { href: "/webhooks", label: "Webhooks", icon: Webhook },
-      { href: "/integrations", label: "Integrations", icon: Plug },
       { href: "/access-control", label: "Access Control", icon: ShieldCheck },
-      { href: "/environment-configuration", label: "Environment Configuration", icon: Settings2 },
       { href: "/rate-limiting", label: "Rate Limiting & Circuit Breakers", icon: Zap },
     ],
   },
   {
-    id: "governance",
-    title: "Feedback & Governance",
+    id: "integrations",
+    title: "Integrations",
+    icon: Plug,
+    items: [
+      { href: "/webhooks", label: "Webhooks", icon: Webhook },
+      { href: "/integrations", label: "Integrations", icon: Plug },
+      { href: "/environment-configuration", label: "Environment Configuration", icon: Settings2 },
+    ],
+  },
+  {
+    id: "feedback",
+    title: "Feedback",
     icon: MessageSquare,
     items: [
       { href: "/feedback", label: "Feedback", icon: MessageSquare },
       { href: "/human-reviews", label: "Human Reviews", icon: UserCheck },
+    ],
+  },
+  {
+    id: "testing",
+    title: "Testing",
+    icon: Target,
+    items: [
       { href: "/evaluation-runs", label: "Evaluation Runs", icon: ClipboardCheck },
       { href: "/benchmarks", label: "Benchmarks", icon: Target },
       { href: "/regression-tests", label: "Regression Tests", icon: RotateCcw },
@@ -222,12 +235,12 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <div className="flex h-14 items-center justify-center border-b border-[var(--border)]">
         {!collapsed && (
           <span className="text-lg font-semibold text-[var(--lavender)]">
-            AI Assistant Mission Control
+            CrewClaw
           </span>
         )}
         {collapsed && (
           <span className="text-xl font-bold text-[var(--tropical-indigo)]">
-            AI
+            CC
           </span>
         )}
       </div>
