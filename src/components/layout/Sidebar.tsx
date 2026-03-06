@@ -212,16 +212,18 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
-  const [expandedSections, setExpandedSections] = useState<string[]>(() =>
-    navSections.map(s => s.id)
-  );
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
   const toggleSection = (sectionId: string) => {
-    setExpandedSections(prev => 
-      prev.includes(sectionId) 
-        ? prev.filter(id => id !== sectionId)
-        : [...prev, sectionId]
-    );
+    setExpandedSections(prev => {
+      if (prev.includes(sectionId)) {
+        // Collapse the section if already expanded
+        return prev.filter(id => id !== sectionId);
+      } else {
+        // Expand only this section, collapse all others
+        return [sectionId];
+      }
+    });
   };
 
   return (
