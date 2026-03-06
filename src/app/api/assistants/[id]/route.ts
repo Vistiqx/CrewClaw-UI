@@ -38,6 +38,18 @@ export async function PATCH(
       }
     }
     
+    if (body.channels) {
+      const validChannels: Channel[] = ["telegram", "slack", "discord", "signal"];
+      if (!Array.isArray(body.channels) || !body.channels.every((c: string) => validChannels.includes(c as Channel))) {
+        return NextResponse.json(
+          { error: "Invalid channels" },
+          { status: 400 }
+        );
+      }
+      // Convert channels array to JSON string for storage
+      body.channels = JSON.stringify(body.channels);
+    }
+    
     if (body.status) {
       const validStatuses: AssistantStatus[] = ["running", "stopped", "error"];
       if (!validStatuses.includes(body.status)) {

@@ -76,6 +76,12 @@ interface AssistantsState {
     assistantName: string;
     fileName: string;
   };
+  channelEditModal: {
+    isOpen: boolean;
+    assistantId: number;
+    assistantName: string;
+    currentChannels: string[];
+  };
 }
 
 type AssistantsAction =
