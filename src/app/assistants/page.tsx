@@ -118,6 +118,12 @@ const initialState: AssistantsState = {
     assistantName: "",
     fileName: "",
   },
+  channelEditModal: {
+    isOpen: false,
+    assistantId: 0,
+    assistantName: "",
+    currentChannels: [],
+  },
 };
 
 function assistantsReducer(state: AssistantsState, action: AssistantsAction): AssistantsState {
