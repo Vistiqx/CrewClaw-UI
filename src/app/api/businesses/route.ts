@@ -110,8 +110,10 @@ export async function POST(request: Request) {
   if (create_assistants && Array.isArray(create_assistants) && create_assistants.length > 0) {
     for (const assistantName of create_assistants) {
       try {
+        // Don't add prefix here - the container naming function will handle it
+        // This prevents double prefix (e.g., MYB-myb-chief-of-staff)
         const assistant = createAssistant({
-          name: `${prefix}-${assistantName}`,
+          name: assistantName,
           business_id: businessId,
           channel: "telegram",
           role: "auto-created",
