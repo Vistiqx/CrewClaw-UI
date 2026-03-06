@@ -253,7 +253,7 @@ export default function BusinessesPage() {
         toast({
           title: "Error",
           description: data.error || "Failed to create business",
-          variant: "destructive",
+          variant: "error",
         });
       }
     } catch (error) {
@@ -261,7 +261,7 @@ export default function BusinessesPage() {
       toast({
         title: "Error",
         description: "Failed to create business",
-        variant: "destructive",
+        variant: "error",
       });
     } finally {
       dispatch({ type: "SET_SUBMITTING", payload: false });
