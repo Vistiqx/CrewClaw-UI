@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { getDb, createAssistant, updateAssistant } from "@/lib/db";
+import { getDb, createAssistant, updateAssistant, getBusinessById } from "@/lib/db";
+import { generateContainerName, getAssistantBasePath } from "@/lib/path-utils";
+import fs from "fs";
+import path from "path";
 
 export async function GET() {
   const db = getDb();
@@ -11,9 +14,14 @@ async function deployContainer(assistant: any): Promise<string> {
   const { default: Docker } = await import("dockerode");
   const docker = new Docker();
   
-  // Use assistant name, sanitized for Docker container naming
-  const sanitizedName = assistant.name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
-  const containerName = `crewclaw-${sanitizedName}-${assistant.id}`;
+  // Get business info for proper container naming
+  const business = getBusinessById(assistant.business_id);
+  if (!business) {
+    throw new Error("Business not found for assistant");
+  }
+  
+  // Use the same naming convention as the deploy route
+  const containerName = generateContainerName(business.prefix, assistant.name);
   
   const existingContainers = await docker.listContainers({ all: true });
   const existing = existingContainers.find((c: { Names: string[] }) => 
@@ -24,7 +32,19 @@ async function deployContainer(assistant: any): Promise<string> {
     throw new Error(`Container ${containerName} already exists`);
   }
   
-  const image = "crewclaw:local";
+  // Create directory structure before deploying
+  const assistantBasePath = getAssistantBasePath(business.prefix, business.name, assistant.name);
+  const workspacePath = path.join(assistantBasePath, "workspace");
+  const configPath = path.join(assistantBasePath, "config");
+  const logsPath = path.join(assistantBasePath, "logs");
+  
+  [workspacePath, configPath, logsPath].forEach((dir) => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
+  
+  const image = "crewclaw:optimized";
   
   try {
     const container = await docker.createContainer({
