@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Check } from "lucide-react";
+import { Building2, Check, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
+import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog";
+import { generateBusinessPrefix } from "@/lib/path-utils";
 
 type Business = {
   id: string;
@@ -70,6 +72,7 @@ const SUBSIDIARY_ASSISTANTS = [
 interface BusinessesState {
   businesses: Business[];
   loading: boolean;
+  isSubmitting: boolean;
   isCreateOpen: boolean;
   isDeleteOpen: boolean;
   isEditOpen: boolean;
@@ -90,6 +93,7 @@ interface BusinessesState {
 type BusinessesAction =
   | { type: "SET_BUSINESSES"; payload: Business[] }
   | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_SUBMITTING"; payload: boolean }
   | { type: "SET_CREATE_OPEN"; payload: boolean }
   | { type: "SET_DELETE_OPEN"; payload: boolean }
   | { type: "SET_EDIT_OPEN"; payload: boolean }
@@ -104,6 +108,7 @@ type BusinessesAction =
 const initialState: BusinessesState = {
   businesses: [],
   loading: true,
+  isSubmitting: false,
   isCreateOpen: false,
   isDeleteOpen: false,
   isEditOpen: false,
@@ -127,6 +132,8 @@ function businessesReducer(state: BusinessesState, action: BusinessesAction): Bu
       return { ...state, businesses: action.payload };
     case "SET_LOADING":
       return { ...state, loading: action.payload };
+    case "SET_SUBMITTING":
+      return { ...state, isSubmitting: action.payload };
     case "SET_CREATE_OPEN":
       return { ...state, isCreateOpen: action.payload };
     case "SET_DELETE_OPEN":
@@ -161,7 +168,8 @@ function businessesReducer(state: BusinessesState, action: BusinessesAction): Bu
 export default function BusinessesPage() {
   const router = useRouter();
   const [state, dispatch] = useReducer(businessesReducer, initialState);
-  const { businesses, loading, isCreateOpen, isDeleteOpen, isEditOpen, selectedBusiness, formData, errors } = state;
+  const { businesses, loading, isSubmitting, isCreateOpen, isDeleteOpen, isEditOpen, selectedBusiness, formData, errors } = state;
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchBusinesses();
@@ -180,13 +188,18 @@ export default function BusinessesPage() {
   };
 
   const generatePrefix = (name: string) => {
-    return name.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 3) || "BIZ";
+    return generateBusinessPrefix(name);
+  };
+
+  const sanitizeBusinessName = (name: string) => {
+    return name.replace(/\s+/g, "-");
   };
 
   const handleNameChange = (value: string) => {
+    const sanitizedName = sanitizeBusinessName(value);
     dispatch({
       type: "SET_FORM_DATA",
-      payload: { name: value, prefix: generatePrefix(value) },
+      payload: { name: sanitizedName, prefix: generatePrefix(sanitizedName) },
     });
   };
 
@@ -197,15 +210,30 @@ export default function BusinessesPage() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.name.trim()) newErrors.name = "Name is required";
-    if (!formData.prefix.trim()) newErrors.prefix = "Prefix is required";
-    else if (formData.prefix.length !== 3) newErrors.prefix = "Prefix must be exactly 3 letters";
     if (!formData.business_type) newErrors.business_type = "Business type is required";
     dispatch({ type: "SET_ERRORS", payload: newErrors });
     return Object.keys(newErrors).length === 0;
   };
 
+  const checkDuplicateName = (name: string): boolean => {
+    const sanitizedName = sanitizeBusinessName(name);
+    return businesses.some(business => business.name === sanitizedName);
+  };
+
   const handleCreate = async () => {
     if (!validateForm()) return;
+    
+    // Check for duplicate business name
+    if (checkDuplicateName(formData.name)) {
+      dispatch({ 
+        type: "SET_ERRORS", 
+        payload: { ...errors, name: "A business with this name already exists" } 
+      });
+      return;
+    }
+    
+    dispatch({ type: "SET_SUBMITTING", payload: true });
+    
     try {
       const res = await fetch("/api/businesses", {
         method: "POST",
@@ -217,12 +245,26 @@ export default function BusinessesPage() {
         dispatch({ type: "SET_CREATE_OPEN", payload: false });
         dispatch({ type: "RESET_FORM" });
         fetchBusinesses();
+        toast({
+          title: "Success",
+          description: `Business "${data.business.name}" created successfully with ${data.deployed?.length || 0} assistants`,
+        });
       } else {
-        alert(data.error || "Failed to create business");
+        toast({
+          title: "Error",
+          description: data.error || "Failed to create business",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Failed to create business:", error);
-      alert("Failed to create business");
+      toast({
+        title: "Error",
+        description: "Failed to create business",
+        variant: "destructive",
+      });
+    } finally {
+      dispatch({ type: "SET_SUBMITTING", payload: false });
     }
   };
 

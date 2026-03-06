@@ -2,6 +2,33 @@
 import path from "path";
 
 /**
+ * Generates a business prefix from the business name
+ * Takes first 3 letters of first 3 words, converts to uppercase
+ * Example: "Test Company Blah Inc" → "TCB"
+ * Example: "Acme Corp" → "ACC"
+ * Example: "Microsoft" → "MIC"
+ */
+export function generateBusinessPrefix(businessName: string): string {
+  // Split by spaces and filter out empty strings
+  const words = businessName.split(/\s+/).filter(word => word.length > 0);
+  
+  // Take first 3 words (or fewer if not enough words)
+  const wordsToUse = words.slice(0, 3);
+  
+  // Take first 3 letters of each word and convert to uppercase
+  const prefix = wordsToUse
+    .map(word => word.substring(0, 3).toUpperCase())
+    .join('');
+  
+  // If prefix is less than 3 characters, pad with X
+  if (prefix.length < 3) {
+    return prefix.padEnd(3, 'X');
+  }
+  
+  return prefix;
+}
+
+/**
  * Sanitizes a name for use in container names and directory paths
  * - Converts to lowercase
  * - Replaces spaces and non-alphanumeric characters with dashes
