@@ -96,7 +96,9 @@ type AssistantsAction =
   | { type: "TOGGLE_CHANNEL"; payload: string }
   | { type: "RESET_NEW_ASSISTANT" }
   | { type: "OPEN_EDIT_MODAL"; payload: { assistantId: number; assistantName: string; fileName: string } }
-  | { type: "CLOSE_EDIT_MODAL" };
+  | { type: "CLOSE_EDIT_MODAL" }
+  | { type: "OPEN_CHANNEL_EDIT_MODAL"; payload: { assistantId: number; assistantName: string; currentChannels: string[] } }
+  | { type: "CLOSE_CHANNEL_EDIT_MODAL" };
 
 const initialState: AssistantsState = {
   assistants: [],
@@ -167,6 +169,24 @@ function assistantsReducer(state: AssistantsState, action: AssistantsAction): As
         ...state,
         editModal: {
           ...state.editModal,
+          isOpen: false,
+        },
+      };
+    case "OPEN_CHANNEL_EDIT_MODAL":
+      return {
+        ...state,
+        channelEditModal: {
+          isOpen: true,
+          assistantId: action.payload.assistantId,
+          assistantName: action.payload.assistantName,
+          currentChannels: action.payload.currentChannels,
+        },
+      };
+    case "CLOSE_CHANNEL_EDIT_MODAL":
+      return {
+        ...state,
+        channelEditModal: {
+          ...state.channelEditModal,
           isOpen: false,
         },
       };
