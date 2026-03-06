@@ -200,6 +200,12 @@ export default function AssistantsPage() {
   const [state, dispatch] = useReducer(assistantsReducer, initialState);
   const { assistants, businesses, filterStatus, filterBusiness, searchQuery, isCreateOpen, isLoading, newAssistant } = state;
 
+  // Create business lookup map for prefix display
+  const businessMap = businesses.reduce((acc, business) => {
+    acc[business.id] = business;
+    return acc;
+  }, {} as Record<string, Business>);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -376,10 +382,15 @@ export default function AssistantsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredAssistants.map((assistant) => (
+                {filteredAssistants.map((assistant) => {
+                  const business = businessMap[assistant.business_id];
+                  const displayName = business 
+                    ? `${business.prefix}-${assistant.name}`
+                    : assistant.name;
+                  return (
                   <TableRow key={assistant.id}>
                     <TableCell className="font-medium text-[var(--lavender)]">
-                      {assistant.name}
+                      {displayName}
                     </TableCell>
                     <TableCell className="text-[var(--lavender-muted)]">
                       {assistant.business_name || assistant.business_id}
@@ -479,7 +490,8 @@ export default function AssistantsPage() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           )}
