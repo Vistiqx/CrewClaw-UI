@@ -23,16 +23,7 @@ async function deployContainer(assistant: any): Promise<string> {
   // Use the same naming convention as the deploy route
   const containerName = generateContainerName(business.prefix, assistant.name);
   
-  const existingContainers = await docker.listContainers({ all: true });
-  const existing = existingContainers.find((c: { Names: string[] }) => 
-    c.Names.some((n: string) => n === `/${containerName}`)
-  );
-  
-  if (existing) {
-    throw new Error(`Container ${containerName} already exists`);
-  }
-  
-  // Create directory structure before deploying
+  // Create directory structure FIRST (before checking/deploying container)
   const assistantBasePath = getAssistantBasePath(business.prefix, business.name, assistant.name);
   const workspacePath = path.join(assistantBasePath, "workspace");
   const configPath = path.join(assistantBasePath, "config");
@@ -43,6 +34,29 @@ async function deployContainer(assistant: any): Promise<string> {
       fs.mkdirSync(dir, { recursive: true });
     }
   });
+  
+  console.log(`✓ Created directories for assistant: ${assistant.name} at ${assistantBasePath}`);
+  
+  // Check if container already exists
+  const existingContainers = await docker.listContainers({ all: true });
+  const existing = existingContainers.find((c: { Names: string[] }) => 
+    c.Names.some((n: string) => n === `/${containerName}`)
+  );
+  
+  if (existing) {
+    console.log(`Container ${containerName} already exists, using existing container`);
+    // If container exists but is stopped, try to start it
+    if (!existing.State || existing.State.toLowerCase() !== 'running') {
+      try {
+        const container = docker.getContainer(existing.Id);
+        await container.start();
+        console.log(`Started existing container: ${containerName}`);
+      } catch (startError) {
+        console.warn(`Could not start existing container ${containerName}:`, startError);
+      }
+    }
+    return existing.Id;
+  }
   
   const image = "crewclaw:optimized";
   
@@ -59,8 +73,10 @@ async function deployContainer(assistant: any): Promise<string> {
     });
     
     await container.start();
+    console.log(`Created and started new container: ${containerName}`);
     return container.id;
   } catch (error) {
+    console.error(`Failed to deploy container ${containerName}:`, error);
     throw new Error(`Failed to deploy container: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
