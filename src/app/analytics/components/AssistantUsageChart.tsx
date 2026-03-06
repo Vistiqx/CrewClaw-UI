@@ -1,17 +1,9 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Loader2 } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
-
-const BarChart = dynamic(() => import("recharts").then((mod) => mod.BarChart), { ssr: false });
-const Bar = dynamic(() => import("recharts").then((mod) => mod.Bar), { ssr: false });
-const XAxis = dynamic(() => import("recharts").then((mod) => mod.XAxis), { ssr: false });
-const YAxis = dynamic(() => import("recharts").then((mod) => mod.YAxis), { ssr: false });
-const CartesianGrid = dynamic(() => import("recharts").then((mod) => mod.CartesianGrid), { ssr: false });
-const Tooltip = dynamic(() => import("recharts").then((mod) => mod.Tooltip), { ssr: false });
-const ResponsiveContainer = dynamic(() => import("recharts").then((mod) => mod.ResponsiveContainer), { ssr: false });
 
 interface AssistantUsageData {
   assistantId: string;

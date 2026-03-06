@@ -49,7 +49,7 @@ export function AppShell({ children }: AppShellProps) {
 
       <main
         className="pt-14 transition-[padding-left] duration-[var(--transition-base)]"
-        style={{ paddingLeft: collapsed ? "64px" : "240px" }}
+        style={{ paddingLeft: collapsed ? "64px" : "250px" }}
       >
         <div className="p-6">
           {children}

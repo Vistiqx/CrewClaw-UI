@@ -1,15 +1,9 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Loader2 } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
-
-const PieChart = dynamic(() => import("recharts").then((mod) => mod.PieChart), { ssr: false });
-const Pie = dynamic(() => import("recharts").then((mod) => mod.Pie), { ssr: false });
-const Cell = dynamic(() => import("recharts").then((mod) => mod.Cell), { ssr: false });
-const Tooltip = dynamic(() => import("recharts").then((mod) => mod.Tooltip), { ssr: false });
-const ResponsiveContainer = dynamic(() => import("recharts").then((mod) => mod.ResponsiveContainer), { ssr: false });
 
 const COLORS = ["#AC8FFEff", "#8A6FD6ff", "#4C3D75ff", "#4ADE80", "#FBBF24", "#F87171", "#60A5FA"];
 

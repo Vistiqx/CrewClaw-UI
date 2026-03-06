@@ -9,7 +9,7 @@ import {
   Users,
   UsersRound,
   Bot,
-  ShieldUser,
+
   Calendar,
   FolderKanban,
   ListTodo,
@@ -77,15 +77,10 @@ interface NavSection {
   items: NavItem[];
 }
 
+// Dashboard as standalone top-level item (not in a section)
+const dashboardItem: NavItem = { href: "/", label: "Dashboard", icon: LayoutDashboard };
+
 const navSections: NavSection[] = [
-  {
-    id: "overview",
-    title: "Overview",
-    icon: LayoutDashboard,
-    items: [
-      { href: "/", label: "Dashboard", icon: LayoutDashboard },
-    ],
-  },
   {
     id: "organization",
     title: "Organization",
@@ -95,7 +90,7 @@ const navSections: NavSection[] = [
       { href: "/councils", label: "Councils", icon: Users },
       { href: "/teams", label: "Teams", icon: UsersRound },
       { href: "/assistants", label: "Assistants", icon: Bot },
-      { href: "/assistants-rbac", label: "Assistants RBAC", icon: ShieldUser },
+      { href: "/assistants-rbac", label: "Assistants RBAC", icon: Shield },
     ],
   },
   {
@@ -220,7 +215,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     <aside
       className={cn(
         "fixed left-0 top-0 z-40 h-screen bg-[var(--night-light)] border-r border-[var(--border)] transition-[width] duration-[var(--transition-base)] flex flex-col",
-        collapsed ? "w-16" : "w-72",
+        collapsed ? "w-16" : "w-[250px]",
         "hidden md:flex"
       )}
     >
@@ -255,8 +250,23 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
       <nav className="flex-1 overflow-y-auto py-2">
         {collapsed ? (
-          // Collapsed view - show all items flat
+          // Collapsed view - show dashboard first, then all items flat
           <ul className="space-y-1 px-2">
+            {/* Dashboard as first item */}
+            <li key={dashboardItem.href}>
+              <Link
+                href={dashboardItem.href}
+                className={cn(
+                  "flex items-center justify-center rounded-md px-2 py-2 transition-[background-color,color] duration-[var(--transition-base)]",
+                  pathname === dashboardItem.href
+                    ? "bg-[var(--tropical-indigo)] text-[var(--night)]"
+                    : "text-[var(--lavender-muted)] hover:bg-[var(--night-lighter)] hover:text-[var(--lavender)]"
+                )}
+                title={dashboardItem.label}
+              >
+                <dashboardItem.icon className="h-5 w-5 flex-shrink-0" />
+              </Link>
+            </li>
             {navSections.flatMap(section => section.items).map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -278,8 +288,24 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             })}
           </ul>
         ) : (
-          // Expanded view - show sections with collapsible headers
+          // Expanded view - show dashboard first, then sections with collapsible headers
           <div className="space-y-1">
+            {/* Dashboard as standalone top-level item */}
+            <div className="px-2 pb-2 border-b border-[var(--border)]">
+              <Link
+                href={dashboardItem.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-[background-color,color] duration-[var(--transition-base)]",
+                  pathname === dashboardItem.href
+                    ? "bg-[var(--tropical-indigo)] text-[var(--night)]"
+                    : "text-[var(--lavender-muted)] hover:bg-[var(--night-lighter)] hover:text-[var(--lavender)]"
+                )}
+              >
+                <dashboardItem.icon className="h-5 w-5 flex-shrink-0" />
+                <span className="truncate">{dashboardItem.label}</span>
+              </Link>
+            </div>
+            
             {navSections.map((section) => {
               const isExpanded = expandedSections.includes(section.id);
               const hasActiveItem = section.items.some(item => pathname === item.href);
