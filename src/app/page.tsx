@@ -78,6 +78,13 @@ export default function Home() {
   const [runningAssistants, setRunningAssistants] = useState<RunningAssistant[]>([]);
   const [taskSummary, setTaskSummary] = useState<TaskSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [businesses, setBusinesses] = useState<{id: string; name: string; prefix: string}[]>([]);
+
+  // Create a mapping of business_id to business name
+  const businessMap = businesses.reduce((acc, business) => {
+    acc[business.id] = { name: business.name, prefix: business.prefix };
+    return acc;
+  }, {} as Record<string, { name: string; prefix: string }>);
 
   useEffect(() => {
     async function fetchData() {
@@ -91,15 +98,16 @@ export default function Home() {
           fetch("/api/assistants"),
         ]);
 
-        const businesses = await bizRes.json();
+        const businessesData = await bizRes.json();
         const running = await assistantsRes.json();
         const overview = await overviewRes.json();
         const healthData = await healthRes.json();
         const tasksData = await tasksRes.json();
         const allAssistants = await allAssistantsRes.json();
 
+        setBusinesses(businessesData);
         setStats({
-          totalBusinesses: businesses.length || 0,
+          totalBusinesses: businessesData.length || 0,
           totalAssistants: allAssistants.length || 0,
           activeAssistants: running.length || 0,
           activeToday: overview.totalRuns || 0,
@@ -302,18 +310,22 @@ export default function Home() {
                     </tr>
                   </thead>
                   <tbody>
-                    {runningAssistants.map((assistant) => (
-                      <tr key={assistant.id} className="border-b border-[var(--border)]">
-                        <td className="py-2 px-4 text-[var(--lavender)]">{assistant.name}</td>
-                        <td className="py-2 px-4 text-[var(--lavender)]">{assistant.business_id}</td>
-                        <td className="py-2 px-4 text-[var(--lavender)]">{assistant.channel}</td>
-                        <td className="py-2 px-4">
-                          <span className="px-2 py-1 rounded text-xs bg-green-500/20 text-green-500">
-                            {assistant.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                    {runningAssistants.map((assistant) => {
+                      const businessInfo = businessMap[assistant.business_id];
+                      const businessDisplayName = businessInfo ? `${businessInfo.prefix}-${businessInfo.name}` : assistant.business_id;
+                      return (
+                        <tr key={assistant.id} className="border-b border-[var(--border)]">
+                          <td className="py-2 px-4 text-[var(--lavender)]">{assistant.name}</td>
+                          <td className="py-2 px-4 text-[var(--lavender)]">{businessDisplayName}</td>
+                          <td className="py-2 px-4 text-[var(--lavender)]">{assistant.channel}</td>
+                          <td className="py-2 px-4">
+                            <span className="px-2 py-1 rounded text-xs bg-green-500/20 text-green-500">
+                              {assistant.status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
