@@ -2,18 +2,18 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { getDb } from "@/lib/db";
+import { getAssistantWorkspacePath } from "@/lib/path-utils";
 
-const WORKSPACE_BASE = "/opt/data/assistants";
-
-async function getAssistantWorkspacePath(assistantId: string): Promise<string | null> {
+async function getAssistantWorkspacePathFromDb(assistantId: string): Promise<string | null> {
   const db = getDb();
-  const assistant = db.prepare("SELECT * FROM assistants WHERE id = ?").get(assistantId) as any;
+  const assistant = db.prepare("SELECT a.*, b.prefix as business_prefix, b.name as business_name FROM assistants a JOIN businesses b ON a.business_id = b.id WHERE a.id = ?").get(assistantId) as any;
   if (!assistant) return null;
   
-  // Use business_id and assistant name to construct path
-  const business = assistant.business_id;
-  const assistantName = assistant.name;
-  return path.join(WORKSPACE_BASE, business, assistantName, "workspace");
+  return getAssistantWorkspacePath(
+    assistant.business_prefix,
+    assistant.business_name,
+    assistant.name
+  );
 }
 
 export async function GET(
@@ -22,7 +22,7 @@ export async function GET(
 ) {
   const { assistantId, name } = await params;
   
-  const workspaceDir = await getAssistantWorkspacePath(assistantId);
+  const workspaceDir = await getAssistantWorkspacePathFromDb(assistantId);
   if (!workspaceDir) {
     return NextResponse.json(
       { error: "Assistant not found" },
@@ -60,7 +60,7 @@ export async function PATCH(
 ) {
   const { assistantId, name } = await params;
   
-  const workspaceDir = await getAssistantWorkspacePath(assistantId);
+  const workspaceDir = await getAssistantWorkspacePathFromDb(assistantId);
   if (!workspaceDir) {
     return NextResponse.json(
       { error: "Assistant not found" },

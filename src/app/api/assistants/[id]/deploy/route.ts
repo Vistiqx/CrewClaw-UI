@@ -8,6 +8,11 @@ import {
 import { decrypt } from "@/lib/encryption";
 import { autoAssignIp, getIpByAssistantId } from "@/lib/network";
 import { archiveAssistantVolume } from "@/lib/archive";
+import {
+  generateContainerName,
+  generateBusinessDirName,
+  getAssistantsDataPath,
+} from "@/lib/path-utils";
 import { exec } from "child_process";
 import { promisify } from "util";
 import path from "path";
@@ -16,21 +21,6 @@ import fs from "fs";
 const execAsync = promisify(exec);
 
 export const dynamic = "force-dynamic";
-
-// Generate container name from business prefix and assistant name
-function generateContainerName(
-  businessPrefix: string,
-  assistantName: string
-): string {
-  // Sanitize assistant name: lowercase, replace non-alphanumeric with hyphens
-  const sanitized = assistantName
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-
-  return `${businessPrefix}-${sanitized}`;
-}
 
 async function ensureImageExists(docker: any): Promise<void> {
   const imageName = "crewclaw:optimized";
@@ -167,10 +157,11 @@ async function deployContainer(assistant: any): Promise<string> {
   // Use the optimized crewclaw image
   const image = "crewclaw:optimized";
 
-  // Construct paths based on business prefix and assistant name
-  const assistantsDataPath =
-    process.env.ASSISTANTS_DATA_PATH || "/opt/data/crewclaw-assistants";
-  const basePath = path.join(assistantsDataPath, containerName);
+  // Construct paths based on business prefix, business name, and assistant name
+  // Format: /opt/data/crewclaw-assistants/{businessPrefix}-{businessName}/{businessPrefix}-{assistantName}/
+  const businessDirName = generateBusinessDirName(businessPrefix, business.name);
+  const assistantsDataPath = getAssistantsDataPath();
+  const basePath = path.join(assistantsDataPath, businessDirName, containerName);
   const workspacePath = path.join(basePath, "workspace");
   const configPath = path.join(basePath, "config");
   const logsPath = path.join(basePath, "logs");
