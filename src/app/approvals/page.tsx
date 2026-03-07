@@ -38,18 +38,18 @@ import { ErrorState } from "@/components/shared/ErrorState";
 
 interface Approval {
   id: string;
-  source_type: string;
-  source_ref: string;
+  sourceType: string;
+  sourceRef: string;
   criticality: string;
-  requested_by_type: string;
-  requested_by_ref: string;
-  requested_by_name: string;
+  requestedByType: string;
+  requestedByRef: string;
+  requestedByName: string;
   status: string;
-  submitted_at: string;
-  decision_at?: string;
+  submittedAt: string;
+  decisionAt?: string;
   reason: string;
-  proposed_action: string;
-  impacted_assets: string;
+  proposedAction: string;
+  impactedAssets: string;
 }
 
 export default function ApprovalsPage() {
@@ -337,7 +337,7 @@ export default function ApprovalsPage() {
               <div className="p-4 rounded-lg bg-[var(--night-lighter)]">
                 <p className="text-sm text-[var(--lavender-muted)] mb-2">Impacted Assets</p>
                 <div className="flex flex-wrap gap-2">
-                  {selectedApproval.impactedAssets.map((asset) => (
+                  {JSON.parse(selectedApproval.impactedAssets || "[]").map((asset: string) => (
                     <Badge key={asset} variant="secondary">{asset}</Badge>
                   ))}
                 </div>
