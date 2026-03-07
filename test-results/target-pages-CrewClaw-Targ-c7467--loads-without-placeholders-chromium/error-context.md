@@ -1,0 +1,79 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e5]: CrewClaw
+      - button "Collapse sidebar" [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+      - navigation [ref=e10]:
+        - generic [ref=e11]:
+          - link "Dashboard" [ref=e13] [cursor=pointer]:
+            - /url: /
+            - img [ref=e14]
+            - generic [ref=e19]: Dashboard
+          - button "Organization" [ref=e21] [cursor=pointer]:
+            - generic [ref=e22]:
+              - img [ref=e23]
+              - generic [ref=e27]: Organization
+            - img [ref=e28]
+          - button "Execution" [ref=e31] [cursor=pointer]:
+            - generic [ref=e32]:
+              - img [ref=e33]
+              - generic [ref=e35]: Execution
+            - img [ref=e36]
+          - button "Knowledge" [ref=e39] [cursor=pointer]:
+            - generic [ref=e40]:
+              - img [ref=e41]
+              - generic [ref=e51]: Knowledge
+            - img [ref=e52]
+          - button "Extensions" [ref=e55] [cursor=pointer]:
+            - generic [ref=e56]:
+              - img [ref=e57]
+              - generic [ref=e59]: Extensions
+            - img [ref=e60]
+          - button "Operations" [ref=e63] [cursor=pointer]:
+            - generic [ref=e64]:
+              - img [ref=e65]
+              - generic [ref=e67]: Operations
+            - img [ref=e68]
+          - button "Security" [ref=e71] [cursor=pointer]:
+            - generic [ref=e72]:
+              - img [ref=e73]
+              - generic [ref=e76]: Security
+            - img [ref=e77]
+          - button "Integrations" [ref=e80] [cursor=pointer]:
+            - generic [ref=e81]:
+              - img [ref=e82]
+              - generic [ref=e84]: Integrations
+            - img [ref=e85]
+          - button "Feedback" [ref=e88] [cursor=pointer]:
+            - generic [ref=e89]:
+              - img [ref=e90]
+              - generic [ref=e92]: Feedback
+            - img [ref=e93]
+          - button "Testing" [ref=e96] [cursor=pointer]:
+            - generic [ref=e97]:
+              - img [ref=e98]
+              - generic [ref=e102]: Testing
+            - img [ref=e103]
+          - button "System" [ref=e106] [cursor=pointer]:
+            - generic [ref=e107]:
+              - img [ref=e108]
+              - generic [ref=e111]: System
+            - img [ref=e112]
+    - banner [ref=e114]
+    - main [ref=e115]:
+      - generic [ref=e117]:
+        - generic [ref=e119]:
+          - heading "Approvals" [level=1] [ref=e120]
+          - paragraph [ref=e121]: Manage approval workflows and authorization requests
+        - generic [ref=e123]:
+          - img [ref=e124]
+          - heading "Page Under Construction" [level=2] [ref=e127]
+          - paragraph [ref=e128]: This page is part of the Enterprise Sidebar Architecture implementation. Full functionality will be added in future iterations.
+  - region "Notifications (F8)":
+    - list
+  - alert [ref=e129]
+```

@@ -20,6 +20,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/Select";
+import { Input } from "@/components/ui/Input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { SummaryCard, FilterToolbar } from "@/components/shared/SummaryCards";
 import { LoadingState } from "@/components/shared/LoadingState";
@@ -80,10 +88,12 @@ export default function TeamsPage() {
   };
 
   const getAdvisorAssistant = (team: Team) => {
+    if (!team.primaryAdvisorAssistantId || team.primaryAdvisorAssistantId === 'unassigned') return null;
     return mockAssistants.find((a) => a.id === team.primaryAdvisorAssistantId);
   };
 
   const getOrchestratorAssistant = (team: Team) => {
+    if (!team.orchestratorAssistantId || team.orchestratorAssistantId === 'unassigned') return null;
     return mockAssistants.find((a) => a.id === team.orchestratorAssistantId);
   };
 
@@ -176,7 +186,12 @@ export default function TeamsPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-[var(--lavender-muted)]">{business?.name || team.businessId}</TableCell>
-                      <TableCell className="text-[var(--lavender-muted)]">{advisor?.name || team.primaryAdvisorAssistantId}</TableCell>
+                      <TableCell className="text-[var(--lavender-muted)]">
+                        {advisor?.name || 
+                         (team.primaryAdvisorAssistantId && team.primaryAdvisorAssistantId !== 'unassigned' 
+                           ? team.primaryAdvisorAssistantId 
+                           : <span className="text-[var(--dim-gray)] italic">Not assigned</span>)}
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Bot className="h-4 w-4 text-[var(--dim-gray)]" />
@@ -235,11 +250,21 @@ export default function TeamsPage() {
                   </div>
                   <div className="p-3 rounded-lg bg-[var(--night-lighter)]">
                     <p className="text-xs text-[var(--lavender-muted)]">Primary Advisor</p>
-                    <p className="font-medium text-[var(--lavender)]">{getAdvisorAssistant(selectedTeam)?.name || selectedTeam.primaryAdvisorAssistantId}</p>
+                    <p className="font-medium text-[var(--lavender)]">
+                      {getAdvisorAssistant(selectedTeam)?.name || 
+                       (selectedTeam.primaryAdvisorAssistantId && selectedTeam.primaryAdvisorAssistantId !== 'unassigned' 
+                         ? selectedTeam.primaryAdvisorAssistantId 
+                         : <span className="text-[var(--dim-gray)] italic">Not assigned</span>)}
+                    </p>
                   </div>
                   <div className="p-3 rounded-lg bg-[var(--night-lighter)]">
                     <p className="text-xs text-[var(--lavender-muted)]">Orchestrator</p>
-                    <p className="font-medium text-[var(--lavender)]">{getOrchestratorAssistant(selectedTeam)?.name || selectedTeam.orchestratorAssistantId}</p>
+                    <p className="font-medium text-[var(--lavender)]">
+                      {getOrchestratorAssistant(selectedTeam)?.name || 
+                       (selectedTeam.orchestratorAssistantId && selectedTeam.orchestratorAssistantId !== 'unassigned' 
+                         ? selectedTeam.orchestratorAssistantId 
+                         : <span className="text-[var(--dim-gray)] italic">Not assigned</span>)}
+                    </p>
                   </div>
                 </div>
 
@@ -339,17 +364,115 @@ export default function TeamsPage() {
       </Dialog>
 
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create Team</DialogTitle>
           </DialogHeader>
-          <div className="p-8 text-center">
-            <UsersRound className="h-12 w-12 text-[var(--tropical-indigo)] mx-auto mb-4" />
-            <p className="text-[var(--lavender)] mb-2">Team Creation</p>
-            <p className="text-sm text-[var(--lavender-muted)]">
-              This would open a form to create a new team with name, business, and initial members.
-            </p>
-          </div>
+          <form className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm text-[var(--lavender-muted)]">Team Name *</label>
+              <Input placeholder="e.g., Finance Team" required />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm text-[var(--lavender-muted)]">Parent Business *</label>
+              <Select required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select business" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockBusinesses.map((biz) => (
+                    <SelectItem key={biz.id} value={biz.id}>{biz.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm text-[var(--lavender-muted)]">Description</label>
+              <Input placeholder="Team purpose and responsibilities" />
+            </div>
+            
+            <div className="border-t border-[var(--border)] pt-4">
+              <p className="text-sm font-medium text-[var(--lavender)] mb-3">Leadership (Optional)</p>
+              <p className="text-xs text-[var(--lavender-muted)] mb-4">
+                You can assign assistants now or leave unassigned and add them later.
+              </p>
+              
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <label className="text-sm text-[var(--lavender-muted)]">Primary Advisor</label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Not assigned" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unassigned">Not assigned</SelectItem>
+                      {mockAssistants.map((a) => (
+                        <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm text-[var(--lavender-muted)]">Orchestrator</label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Not assigned" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unassigned">Not assigned</SelectItem>
+                      {mockAssistants.map((a) => (
+                        <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            
+            <div className="border-t border-[var(--border)] pt-4">
+              <p className="text-sm font-medium text-[var(--lavender)] mb-3">Default Settings (Optional)</p>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <label className="text-sm text-[var(--lavender-muted)]">Default Provider</label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select provider" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="openai">OpenAI</SelectItem>
+                      <SelectItem value="anthropic">Anthropic</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm text-[var(--lavender-muted)]">Default Model</label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="gpt-4">GPT-4</SelectItem>
+                      <SelectItem value="claude-3-opus">Claude 3 Opus</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 pt-4">
+              <Button type="button" variant="secondary" className="flex-1" onClick={() => setIsCreateOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" className="flex-1">
+                Create Team
+              </Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
