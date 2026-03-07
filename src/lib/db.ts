@@ -249,6 +249,44 @@ function initDb(database: Database.Database): void {
     );
   `);
 
+  // Create chat_sessions table
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS chat_sessions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      assistant_id INTEGER NOT NULL,
+      user_id TEXT NOT NULL,
+      started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      last_message_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (assistant_id) REFERENCES assistants(id) ON DELETE CASCADE
+    );
+  `);
+
+  // Create chat_messages table
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS chat_messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      session_id INTEGER NOT NULL,
+      role TEXT NOT NULL,
+      content TEXT NOT NULL,
+      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (session_id) REFERENCES chat_sessions(id) ON DELETE CASCADE
+    );
+  `);
+
+  // Create network_config table
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS network_config (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      parent_interface TEXT DEFAULT 'eth0',
+      subnet TEXT DEFAULT '172.20.0.0/16',
+      gateway TEXT DEFAULT '172.20.0.1',
+      ip_range_start TEXT DEFAULT '172.20.0.100',
+      ip_range_end TEXT DEFAULT '172.20.255.254',
+      network_name TEXT DEFAULT 'crewclaw-bridge',
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
   // Create governance tables
   createGovernanceTables(database);
   
