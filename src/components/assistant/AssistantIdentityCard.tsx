@@ -3,7 +3,27 @@
 import { Bot, Building2, Users, Activity, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import type { Assistant } from "@/lib/mock-data/crewclaw-governance";
+
+interface Assistant {
+  id: string;
+  name: string;
+  businessId: string;
+  teamId?: string;
+  status: string;
+  operatingMode: string;
+  description: string;
+  councilIds: string[];
+  recentRuns: number;
+  recentApprovals: number;
+}
+
+interface AssistantIdentityCardProps {
+  assistant: Assistant;
+  businesses?: { id: string; name: string }[];
+  teams?: { id: string; name: string }[];
+  councils?: { id: string; name: string }[];
+  compact?: boolean;
+}
 
 interface AssistantIdentityCardProps {
   assistant: Assistant;
