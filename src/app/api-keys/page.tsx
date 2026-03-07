@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Key, Eye, EyeOff, RotateCw, CheckCircle, AlertTriangle, XCircle, Trash2, Edit2 } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Key, Eye, RotateCw, CheckCircle, AlertTriangle, XCircle, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -34,19 +34,51 @@ import { SummaryCard, FilterToolbar } from "@/components/shared/SummaryCards";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ErrorState } from "@/components/shared/ErrorState";
-import { mockApiKeys, type ApiKey } from "@/lib/mock-data/crewclaw-governance";
+
+interface ApiKey {
+  id: string;
+  name: string;
+  provider: string;
+  scope: string;
+  environment: string;
+  status: string;
+  assigned_assistants: number;
+  health: string;
+  last_rotated_at: string;
+}
 
 export default function ApiKeysPage() {
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>(mockApiKeys);
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterProvider, setFilterProvider] = useState("all");
-  const [isLoading] = useState(false);
-  const [error] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedKey, setSelectedKey] = useState<ApiKey | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isRotateDialogOpen, setIsRotateDialogOpen] = useState(false);
+
+  useEffect(() => {
+    fetchApiKeys();
+  }, []);
+
+  const fetchApiKeys = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/api-keys");
+      if (!response.ok) {
+        throw new Error("Failed to fetch API keys");
+      }
+      const data = await response.json();
+      setApiKeys(data.apiKeys || []);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredKeys = useMemo(() => {
     return apiKeys.filter((key) => {
@@ -64,7 +96,7 @@ export default function ApiKeysPage() {
     const total = apiKeys.length;
     const active = apiKeys.filter((k) => k.status === "active").length;
     const expiringSoon = apiKeys.filter((k) => {
-      const lastRotated = new Date(k.lastRotatedAt);
+      const lastRotated = new Date(k.last_rotated_at);
       const daysSinceRotation = (Date.now() - lastRotated.getTime()) / (1000 * 60 * 60 * 24);
       return daysSinceRotation > 80;
     }).length;
@@ -72,50 +104,32 @@ export default function ApiKeysPage() {
     return { total, active, expiringSoon, providers };
   }, [apiKeys]);
 
-  const handleRotateKey = (keyId: string) => {
-    setApiKeys((prev) =>
-      prev.map((k) =>
-        k.id === keyId
-          ? { ...k, lastRotatedAt: new Date().toISOString(), status: "active" as const }
-          : k
-      )
-    );
+  const handleRotateKey = async (keyId: string) => {
     setIsRotateDialogOpen(false);
     setSelectedKey(null);
+    await fetchApiKeys();
   };
 
-  const handleDeleteKey = (keyId: string) => {
-    setApiKeys((prev) => prev.filter((k) => k.id !== keyId));
+  const handleDeleteKey = async (keyId: string) => {
+    await fetchApiKeys();
   };
 
-  const handleCreateKey = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateKey = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const newKey: ApiKey = {
-      id: `key-${Date.now()}`,
-      name: formData.get("name") as string,
-      provider: formData.get("provider") as string,
-      scope: formData.get("scope") as ApiKey["scope"],
-      environment: formData.get("environment") as ApiKey["environment"],
-      status: "active",
-      lastRotatedAt: new Date().toISOString(),
-      assignedAssistants: 0,
-      health: "healthy",
-    };
-    setApiKeys((prev) => [...prev, newKey]);
     setIsCreateDialogOpen(false);
+    await fetchApiKeys();
   };
 
-  const getStatusBadge = (status: ApiKey["status"]) => {
-    const variants: Record<string, "success" | "secondary" | "error" | "warning"> = {
+  const getStatusBadge = (status: string) => {
+    const variants: Record<string, "success" | "secondary" | "error"> = {
       active: "success",
       inactive: "secondary",
       expired: "error",
     };
-    return <Badge variant={variants[status]}>{status}</Badge>;
+    return <Badge variant={variants[status] || "secondary"}>{status}</Badge>;
   };
 
-  const getHealthBadge = (health: ApiKey["health"]) => {
+  const getHealthBadge = (health: string) => {
     const variants: Record<string, "success" | "warning" | "error"> = {
       healthy: "success",
       warning: "warning",
@@ -127,8 +141,8 @@ export default function ApiKeysPage() {
       error: <XCircle className="h-3 w-3 mr-1" />,
     };
     return (
-      <Badge variant={variants[health]} className="flex items-center">
-        {icons[health]}
+      <Badge variant={variants[health] || "secondary"} className="flex items-center">
+        {icons[health as keyof typeof icons]}
         {health}
       </Badge>
     );
@@ -157,7 +171,7 @@ export default function ApiKeysPage() {
     return (
       <div className="space-y-6">
         <PageHeader title="API Keys" description="Manage API keys and authentication tokens for model providers" />
-        <ErrorState message={error} onRetry={() => window.location.reload()} />
+        <ErrorState message={error} onRetry={fetchApiKeys} />
       </div>
     );
   }
@@ -252,8 +266,8 @@ export default function ApiKeysPage() {
                     <TableCell className="capitalize text-[var(--lavender-muted)]">{key.environment}</TableCell>
                     <TableCell>{getStatusBadge(key.status)}</TableCell>
                     <TableCell>{getHealthBadge(key.health)}</TableCell>
-                    <TableCell className="text-[var(--lavender-muted)]">{formatDate(key.lastRotatedAt)}</TableCell>
-                    <TableCell className="text-[var(--lavender-muted)]">{key.assignedAssistants} assistants</TableCell>
+                    <TableCell className="text-[var(--lavender-muted)]">{formatDate(key.last_rotated_at)}</TableCell>
+                    <TableCell className="text-[var(--lavender-muted)]">{key.assigned_assistants} assistants</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button

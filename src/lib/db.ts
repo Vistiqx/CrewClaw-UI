@@ -1307,3 +1307,138 @@ export function getScheduledTaskById(id: number): ScheduledTask | undefined {
 export function toggleScheduledTask(id: number, enabled: boolean): ScheduledTask | undefined {
   return getScheduledTaskById(id);
 }
+
+// Governance Query Functions
+
+export function getAllTeams(): any[] {
+  const db = getDb();
+  return db.prepare(`
+    SELECT t.*, b.name as business_name, 
+           a1.name as advisor_name, 
+           a2.name as orchestrator_name,
+           (SELECT COUNT(*) FROM team_members WHERE team_id = t.id) as member_count
+    FROM teams t
+    LEFT JOIN businesses b ON t.business_id = b.id
+    LEFT JOIN assistants a1 ON t.primary_advisor_assistant_id = a1.id
+    LEFT JOIN assistants a2 ON t.orchestrator_assistant_id = a2.id
+    ORDER BY t.name
+  `).all();
+}
+
+export function getTeamById(id: string): any | undefined {
+  const db = getDb();
+  const team = db.prepare(`
+    SELECT t.*, b.name as business_name,
+           a1.name as advisor_name,
+           a2.name as orchestrator_name
+    FROM teams t
+    LEFT JOIN businesses b ON t.business_id = b.id
+    LEFT JOIN assistants a1 ON t.primary_advisor_assistant_id = a1.id
+    LEFT JOIN assistants a2 ON t.orchestrator_assistant_id = a2.id
+    WHERE t.id = ?
+  `).get(id);
+  
+  if (team) {
+    team.members = db.prepare(`
+      SELECT a.id, a.name, a.status 
+      FROM team_members tm
+      JOIN assistants a ON tm.assistant_id = a.id
+      WHERE tm.team_id = ?
+    `).all(id);
+  }
+  
+  return team;
+}
+
+export function getAllCouncils(): any[] {
+  const db = getDb();
+  return db.prepare(`
+    SELECT c.*, b.name as business_name,
+           a.name as lead_assistant_name,
+           (SELECT COUNT(*) FROM council_members WHERE council_id = c.id) as member_count
+    FROM councils c
+    LEFT JOIN businesses b ON c.primary_business_id = b.id
+    LEFT JOIN assistants a ON c.lead_assistant_id = a.id
+    ORDER BY c.name
+  `).all();
+}
+
+export function getCouncilById(id: string): any | undefined {
+  const db = getDb();
+  const council = db.prepare(`
+    SELECT c.*, b.name as business_name,
+           a.name as lead_assistant_name
+    FROM councils c
+    LEFT JOIN businesses b ON c.primary_business_id = b.id
+    LEFT JOIN assistants a ON c.lead_assistant_id = a.id
+    WHERE c.id = ?
+  `).get(id);
+  
+  if (council) {
+    council.members = db.prepare(`
+      SELECT a.id, a.name, a.status 
+      FROM council_members cm
+      JOIN assistants a ON cm.assistant_id = a.id
+      WHERE cm.council_id = ?
+    `).all(id);
+    
+    council.subsidiaries = db.prepare(`
+      SELECT b.name 
+      FROM council_subsidiaries cs
+      JOIN businesses b ON cs.business_id = b.id
+      WHERE cs.council_id = ?
+    `).all(id).map((row: any) => row.name);
+  }
+  
+  return council;
+}
+
+export function getAllApiKeys(): any[] {
+  const db = getDb();
+  return db.prepare("SELECT * FROM api_keys ORDER BY name").all();
+}
+
+export function getAllModelRegistry(): any[] {
+  const db = getDb();
+  return db.prepare("SELECT * FROM model_registry ORDER BY provider, model").all();
+}
+
+export function getAllRoutingRules(): any[] {
+  const db = getDb();
+  return db.prepare("SELECT * FROM model_routing_rules ORDER BY priority").all();
+}
+
+export function getAllWorkflows(): any[] {
+  const db = getDb();
+  return db.prepare("SELECT * FROM workflows ORDER BY name").all();
+}
+
+export function getAllPipelines(): any[] {
+  const db = getDb();
+  return db.prepare("SELECT * FROM pipelines ORDER BY name").all();
+}
+
+export function getAllApprovals(): any[] {
+  const db = getDb();
+  return db.prepare("SELECT * FROM approvals ORDER BY submitted_at DESC").all();
+}
+
+export function getAllSecrets(): any[] {
+  const db = getDb();
+  return db.prepare(`
+    SELECT s.*, a.name as assistant_name 
+    FROM secrets_vault s
+    LEFT JOIN assistants a ON s.assistant_id = a.id
+    ORDER BY s.created_at DESC
+  `).all();
+}
+
+export function getAssistantRbacPolicy(assistantId: number): any | undefined {
+  const db = getDb();
+  return db.prepare("SELECT * FROM assistant_rbac_policies WHERE assistant_id = ?").get(assistantId);
+}
+
+export function getAssistantModelAllows(assistantId: number): any[] {
+  const db = getDb();
+  return db.prepare("SELECT * FROM assistant_model_allows WHERE assistant_id = ?").all(assistantId);
+}
