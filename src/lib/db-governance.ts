@@ -235,12 +235,6 @@ export function createGovernanceTables(database: Database.Database): void {
 }
 
 export function seedGovernanceData(database: Database.Database): void {
-  // Check if data already exists
-  const existingAssistants = database.prepare("SELECT COUNT(*) as count FROM assistants").get() as { count: number };
-  if (existingAssistants.count > 0) {
-    return; // Don't seed if data exists
-  }
-
   const now = new Date().toISOString();
 
   // Seed businesses first (check if they exist from registry)
@@ -260,6 +254,12 @@ export function seedGovernanceData(database: Database.Database): void {
     for (const biz of businesses) {
       insertBiz.run(biz.id, biz.name, biz.prefix, biz.industry, biz.description, 'UTC', 'active', biz.type, now, now);
     }
+  }
+
+  // Check if governance data already exists
+  const existingAssistants = database.prepare("SELECT COUNT(*) as count FROM assistants").get() as { count: number };
+  if (existingAssistants.count > 0) {
+    return; // Don't seed governance data if assistants already exist
   }
 
   // Seed assistants
