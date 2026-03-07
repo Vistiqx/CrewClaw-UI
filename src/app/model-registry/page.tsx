@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Cpu, Eye, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -23,16 +23,50 @@ import {
 import { SummaryCard, FilterToolbar } from "@/components/shared/SummaryCards";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { mockModelRegistry, type ModelRegistryEntry } from "@/lib/mock-data/crewclaw-governance";
+import { ErrorState } from "@/components/shared/ErrorState";
+
+interface ModelRegistryEntry {
+  id: string;
+  provider: string;
+  model: string;
+  capability_tags: string;
+  context_window: number;
+  cost_tier: string;
+  latency_tier: string;
+  status: string;
+  description: string;
+}
 
 export default function ModelRegistryPage() {
-  const [models] = useState<ModelRegistryEntry[]>(mockModelRegistry);
+  const [models, setModels] = useState<ModelRegistryEntry[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterProvider, setFilterProvider] = useState("all");
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<ModelRegistryEntry | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+
+  useEffect(() => {
+    fetchModels();
+  }, []);
+
+  const fetchModels = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/model-registry");
+      if (!response.ok) {
+        throw new Error("Failed to fetch model registry");
+      }
+      const data = await response.json();
+      setModels(data.models || []);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredModels = useMemo(() => {
     return models.filter((model) => {
@@ -40,7 +74,7 @@ export default function ModelRegistryPage() {
         !searchQuery ||
         model.model.toLowerCase().includes(searchQuery.toLowerCase()) ||
         model.provider.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        model.capabilityTags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+        model.capability_tags.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = filterStatus === "all" || model.status === filterStatus;
       const matchesProvider = filterProvider === "all" || model.provider === filterProvider;
       return matchesSearch && matchesStatus && matchesProvider;
@@ -55,7 +89,7 @@ export default function ModelRegistryPage() {
     return { total, active, blocked, deprecated };
   }, [models]);
 
-  const getStatusBadge = (status: ModelRegistryEntry["status"]) => {
+  const getStatusBadge = (status: string) => {
     const variants: Record<string, "success" | "error" | "warning"> = {
       active: "success",
       blocked: "error",
@@ -67,14 +101,14 @@ export default function ModelRegistryPage() {
       deprecated: <AlertTriangle className="h-3 w-3 mr-1" />,
     };
     return (
-      <Badge variant={variants[status]} className="flex items-center w-fit">
-        {icons[status]}
+      <Badge variant={variants[status] || "secondary"} className="flex items-center w-fit">
+        {icons[status as keyof typeof icons]}
         {status}
       </Badge>
     );
   };
 
-  const getCostTierBadge = (tier: ModelRegistryEntry["costTier"]) => {
+  const getCostTierBadge = (tier: string) => {
     const colors: Record<string, string> = {
       free: "bg-[var(--success)]/10 text-[var(--success)]",
       low: "bg-[var(--info)]/10 text-[var(--info)]",
@@ -83,7 +117,7 @@ export default function ModelRegistryPage() {
       premium: "bg-[var(--error)]/10 text-[var(--error)]",
     };
     return (
-      <span className={`px-2 py-1 rounded text-xs font-medium ${colors[tier]}`}>
+      <span className={`px-2 py-1 rounded text-xs font-medium ${colors[tier] || colors.medium}`}>
         {tier.charAt(0).toUpperCase() + tier.slice(1)}
       </span>
     );
@@ -96,6 +130,15 @@ export default function ModelRegistryPage() {
       <div className="space-y-6">
         <PageHeader title="Model Registry" description="Manage AI model configurations and capabilities" />
         <LoadingState message="Loading model registry..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Model Registry" description="Manage AI model configurations and capabilities" />
+        <ErrorState message={error} onRetry={fetchModels} />
       </div>
     );
   }
@@ -175,18 +218,18 @@ export default function ModelRegistryPage() {
                     <TableCell className="text-[var(--lavender)]">{model.model}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {model.capabilityTags.map((tag) => (
+                        {model.capability_tags.split(",").map((tag) => (
                           <Badge key={tag} variant="secondary" className="text-xs capitalize">
-                            {tag}
+                            {tag.trim()}
                           </Badge>
                         ))}
                       </div>
                     </TableCell>
                     <TableCell className="text-[var(--lavender-muted)]">
-                      {(model.contextWindow / 1000).toFixed(0)}k
+                      {(model.context_window / 1000).toFixed(0)}k
                     </TableCell>
-                    <TableCell>{getCostTierBadge(model.costTier)}</TableCell>
-                    <TableCell className="capitalize text-[var(--lavender-muted)]">{model.latencyTier}</TableCell>
+                    <TableCell>{getCostTierBadge(model.cost_tier)}</TableCell>
+                    <TableCell className="capitalize text-[var(--lavender-muted)]">{model.latency_tier}</TableCell>
                     <TableCell>{getStatusBadge(model.status)}</TableCell>
                     <TableCell className="text-right">
                       <Button
@@ -225,19 +268,19 @@ export default function ModelRegistryPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-3 rounded-lg bg-[var(--night-lighter)]">
                   <p className="text-sm text-[var(--lavender-muted)] mb-1">Context Window</p>
-                  <p className="font-medium text-[var(--lavender)]">{selectedModel.contextWindow.toLocaleString()} tokens</p>
+                  <p className="font-medium text-[var(--lavender)]">{selectedModel.context_window.toLocaleString()} tokens</p>
                 </div>
                 <div className="p-3 rounded-lg bg-[var(--night-lighter)]">
                   <p className="text-sm text-[var(--lavender-muted)] mb-1">Latency</p>
-                  <p className="capitalize font-medium text-[var(--lavender)]">{selectedModel.latencyTier}</p>
+                  <p className="capitalize font-medium text-[var(--lavender)]">{selectedModel.latency_tier}</p>
                 </div>
               </div>
               <div className="p-3 rounded-lg bg-[var(--night-lighter)]">
                 <p className="text-sm text-[var(--lavender-muted)] mb-2">Capabilities</p>
                 <div className="flex flex-wrap gap-2">
-                  {selectedModel.capabilityTags.map((tag) => (
+                  {selectedModel.capability_tags.split(",").map((tag) => (
                     <Badge key={tag} variant="secondary" className="capitalize">
-                      {tag}
+                      {tag.trim()}
                     </Badge>
                   ))}
                 </div>
@@ -248,7 +291,7 @@ export default function ModelRegistryPage() {
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--night-lighter)]">
                 <span className="text-sm text-[var(--lavender-muted)]">Cost Tier</span>
-                {getCostTierBadge(selectedModel.costTier)}
+                {getCostTierBadge(selectedModel.cost_tier)}
               </div>
               {selectedModel.status === "deprecated" && (
                 <div className="p-3 rounded-lg bg-[var(--warning)]/10 border border-[var(--warning)]/20">
