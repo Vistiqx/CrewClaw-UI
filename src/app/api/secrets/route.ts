@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCredentials, getAllAssistants, addCredential, deleteCredential, updateCredential } from "@/lib/db";
 import { encrypt } from "@/lib/encryption";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const credentials = getCredentials();

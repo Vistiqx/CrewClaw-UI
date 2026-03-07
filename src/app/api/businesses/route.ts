@@ -4,6 +4,8 @@ import { generateContainerName, getAssistantBasePath } from "@/lib/path-utils";
 import fs from "fs";
 import path from "path";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const db = getDb();
   const businesses = db.prepare("SELECT * FROM businesses ORDER BY created_at DESC").all();

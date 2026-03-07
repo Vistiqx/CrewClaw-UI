@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getModelDistribution, getAssistantUsage } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   const [modelDistribution, assistantUsage] = await Promise.all([
     Promise.resolve(getModelDistribution()),
