@@ -1,6 +1,7 @@
 import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
+import { createGovernanceTables, seedGovernanceData } from "./db-governance";
 
 const DB_PATH = process.env.DB_PATH || path.join(process.cwd(), "data", "CrewClaw-UI.db");
 
@@ -247,6 +248,12 @@ function initDb(database: Database.Database): void {
       FOREIGN KEY (assistant_id) REFERENCES assistants(id) ON DELETE SET NULL
     );
   `);
+
+  // Create governance tables
+  createGovernanceTables(database);
+  
+  // Seed all governance data
+  seedGovernanceData(database);
   
   seedAuditLogs();
 }

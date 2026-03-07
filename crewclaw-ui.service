@@ -1,0 +1,20 @@
+[Unit]
+Description=CrewClaw UI Application
+After=network.target
+
+[Service]
+Type=simple
+User=echobyte
+Group=echobyte
+WorkingDirectory=/opt/scripts/crewclaw-ui/.next/standalone
+Environment=NODE_ENV=production
+Environment=ASSISTANTS_DATA_PATH=/opt/data/crewclaw-assistants
+Environment=DB_PATH=/opt/data/crewclaw-ui/CrewClaw-UI.db
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
