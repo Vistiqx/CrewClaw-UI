@@ -34,20 +34,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { SummaryCard } from "@/components/shared/SummaryCards";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { EmptyState } from "@/components/shared/EmptyState";
-import {
-  mockApprovals,
-  mockAssistants,
-  mockBusinesses,
-  type Approval,
-} from "@/lib/mock-data/crewclaw-governance";
+import { ErrorState } from "@/components/shared/ErrorState";
+
+interface Approval {
+  id: string;
+  source_type: string;
+  source_ref: string;
+  criticality: string;
+  requested_by_type: string;
+  requested_by_ref: string;
+  requested_by_name: string;
+  status: string;
+  submitted_at: string;
+  decision_at?: string;
+  reason: string;
+  proposed_action: string;
+  impacted_assets: string;
+}
 
 export default function ApprovalsPage() {
-  const [approvals, setApprovals] = useState<Approval[]>(mockApprovals);
+  const [approvals, setApprovals] = useState<Approval[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterCriticality, setFilterCriticality] = useState("all");
   const [filterSource, setFilterSource] = useState("all");
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedApproval, setSelectedApproval] = useState<Approval | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("pending");

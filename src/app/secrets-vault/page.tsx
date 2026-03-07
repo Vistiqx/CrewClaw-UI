@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Lock, Plus, Eye, Shield, Key, RefreshCw, AlertCircle, CheckCircle } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Lock, Plus, Eye, Shield, Key } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -20,34 +20,61 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { SummaryCard, FilterToolbar } from "@/components/shared/SummaryCards";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { EmptyState } from "@/components/shared/EmptyState";
-import {
-  mockSecrets,
-  mockAssistants,
-  mockApiKeys,
-  type SecretReference,
-} from "@/lib/mock-data/crewclaw-governance";
+import { ErrorState } from "@/components/shared/ErrorState";
+
+interface Secret {
+  id: string;
+  assistant_id: number;
+  assistant_name?: string;
+  kind: string;
+  provider_or_channel: string;
+  purpose: string;
+  environment: string;
+  status: string;
+  last_rotated_at: string;
+}
 
 export default function SecretsVaultPage() {
-  const [secrets] = useState<SecretReference[]>(mockSecrets);
+  const [secrets, setSecrets] = useState<Secret[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterKind, setFilterKind] = useState("all");
   const [filterEnvironment, setFilterEnvironment] = useState("all");
-  const [isLoading] = useState(false);
-  const [selectedSecret, setSelectedSecret] = useState<SecretReference | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedSecret, setSelectedSecret] = useState<Secret | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+
+  useEffect(() => {
+    fetchSecrets();
+  }, []);
+
+  const fetchSecrets = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/secrets");
+      if (!response.ok) {
+        throw new Error("Failed to fetch secrets");
+      }
+      const data = await response.json();
+      setSecrets(data.secrets || []);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredSecrets = useMemo(() => {
     return secrets.filter((secret) => {
       const matchesSearch =
         !searchQuery ||
         secret.purpose.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        secret.providerOrChannel.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        mockAssistants.find((a) => a.id === secret.assistantId)?.name.toLowerCase().includes(searchQuery.toLowerCase());
+        secret.provider_or_channel.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesKind = filterKind === "all" || secret.kind === filterKind;
       const matchesEnvironment = filterEnvironment === "all" || secret.environment === filterEnvironment;
       return matchesSearch && matchesKind && matchesEnvironment;
@@ -62,16 +89,16 @@ export default function SecretsVaultPage() {
     return { total, active, channelSecrets, providerSecrets };
   }, [secrets]);
 
-  const getStatusBadge = (status: SecretReference["status"]) => {
+  const getStatusBadge = (status: string) => {
     const variants: Record<string, "success" | "secondary"> = {
       active: "success",
       inactive: "secondary",
     };
-    return <Badge variant={variants[status]}>{status}</Badge>;
+    return <Badge variant={variants[status] || "secondary"}>{status}</Badge>;
   };
 
-  const getKindBadge = (kind: SecretReference["kind"]) => {
-    const icons = {
+  const getKindBadge = (kind: string) => {
+    const icons: Record<string, React.ReactNode> = {
       channel: <Key className="h-3 w-3 mr-1" />,
       provider: <Shield className="h-3 w-3 mr-1" />,
       app: <Lock className="h-3 w-3 mr-1" />,
@@ -82,10 +109,6 @@ export default function SecretsVaultPage() {
         {kind}
       </Badge>
     );
-  };
-
-  const getAssistant = (secret: SecretReference) => {
-    return mockAssistants.find((a) => a.id === secret.assistantId);
   };
 
   const formatDate = (dateString: string) => {
@@ -101,6 +124,15 @@ export default function SecretsVaultPage() {
       <div className="space-y-6">
         <PageHeader title="Secrets Vault" description="Manage secrets and sensitive credentials" />
         <LoadingState message="Loading secrets..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Secrets Vault" description="Manage secrets and sensitive credentials" />
+        <ErrorState message={error} onRetry={fetchSecrets} />
       </div>
     );
   }
@@ -157,8 +189,6 @@ export default function SecretsVaultPage() {
                 onChange: setFilterEnvironment,
               },
             ]}
-            actionLabel="Add Secret"
-            onAction={() => setIsCreateOpen(true)}
           />
         </CardHeader>
         <CardContent>
@@ -179,184 +209,50 @@ export default function SecretsVaultPage() {
                   <TableHead>Purpose</TableHead>
                   <TableHead>Environment</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Last Rotated</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredSecrets.map((secret) => {
-                  const assistant = getAssistant(secret);
-                  return (
-                    <TableRow key={secret.id}>
-                      <TableCell className="font-medium text-[var(--lavender)]">
-                        <div className="flex items-center gap-2">
-                          <Lock className="h-4 w-4 text-[var(--tropical-indigo)]" />
-                          {assistant?.name || secret.assistantId}
-                        </div>
-                      </TableCell>
-                      <TableCell>{getKindBadge(secret.kind)}</TableCell>
-                      <TableCell className="capitalize text-[var(--lavender-muted)]">{secret.providerOrChannel}</TableCell>
-                      <TableCell className="text-[var(--lavender-muted)]">{secret.purpose}</TableCell>
-                      <TableCell className="capitalize text-[var(--lavender-muted)]">{secret.environment}</TableCell>
-                      <TableCell>{getStatusBadge(secret.status)}</TableCell>
-                      <TableCell className="text-[var(--lavender-muted)]">{formatDate(secret.lastRotatedAt)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => {
-                              setSelectedSecret(secret);
-                              setIsDetailOpen(true);
-                            }}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="ghost">
-                            <RefreshCw className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                {filteredSecrets.map((secret) => (
+                  <TableRow key={secret.id}>
+                    <TableCell className="font-medium text-[var(--lavender)]">
+                      <div className="flex items-center gap-2">
+                        <Lock className="h-4 w-4 text-[var(--tropical-indigo)]" />
+                        {secret.assistant_name || `Assistant ${secret.assistant_id}`}
+                      </div>
+                    </TableCell>
+                    <TableCell>{getKindBadge(secret.kind)}</TableCell>
+                    <TableCell className="capitalize text-[var(--lavender-muted)]">{secret.provider_or_channel}</TableCell>
+                    <TableCell className="text-[var(--lavender-muted)]">{secret.purpose}</TableCell>
+                    <TableCell className="capitalize text-[var(--lavender-muted)]">{secret.environment}</TableCell>
+                    <TableCell>{getStatusBadge(secret.status)}</TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setSelectedSecret(secret);
+                          setIsDetailOpen(true);
+                        }}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           )}
-        </CardContent>
-      </Card>
-
-      <Card className="bg-[var(--night-light)] border-[var(--border)]">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Shield className="h-4 w-4 text-[var(--tropical-indigo)]" />
-            Secret Usage Matrix
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Assistant</TableHead>
-                  <TableHead>Channels</TableHead>
-                  <TableHead>Providers</TableHead>
-                  <TableHead>Apps</TableHead>
-                  <TableHead>Total Secrets</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockAssistants.map((assistant) => {
-                  const assistantSecrets = secrets.filter((s) => s.assistantId === assistant.id);
-                  const channelCount = assistantSecrets.filter((s) => s.kind === "channel").length;
-                  const providerCount = assistantSecrets.filter((s) => s.kind === "provider").length;
-                  const appCount = assistantSecrets.filter((s) => s.kind === "app").length;
-                  
-                  return (
-                    <TableRow key={assistant.id}>
-                      <TableCell className="font-medium text-[var(--lavender)]">{assistant.name}</TableCell>
-                      <TableCell>
-                        {channelCount > 0 ? (
-                          <Badge variant="secondary">{channelCount}</Badge>
-                        ) : (
-                          <span className="text-[var(--dim-gray)]">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {providerCount > 0 ? (
-                          <Badge variant="secondary">{providerCount}</Badge>
-                        ) : (
-                          <span className="text-[var(--dim-gray)]">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {appCount > 0 ? (
-                          <Badge variant="secondary">{appCount}</Badge>
-                        ) : (
-                          <span className="text-[var(--dim-gray)]">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Shield className="h-4 w-4 text-[var(--tropical-indigo)]" />
-                          <span className="font-medium">{assistantSecrets.length}</span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
         </CardContent>
       </Card>
 
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5 text-[var(--tropical-indigo)]" />
-              Secret Details
-            </DialogTitle>
+            <DialogTitle>Secret Details</DialogTitle>
           </DialogHeader>
-          {selectedSecret && (
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-[var(--night-lighter)]">
-                <p className="text-xs text-[var(--lavender-muted)] mb-1">Assistant</p>
-                <p className="font-medium text-[var(--lavender)]">{getAssistant(selectedSecret)?.name || selectedSecret.assistantId}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 rounded-lg bg-[var(--night-lighter)]">
-                  <p className="text-xs text-[var(--lavender-muted)]">Type</p>
-                  {getKindBadge(selectedSecret.kind)}
-                </div>
-                <div className="p-3 rounded-lg bg-[var(--night-lighter)]">
-                  <p className="text-xs text-[var(--lavender-muted)]">Environment</p>
-                  <p className="capitalize text-[var(--lavender)]">{selectedSecret.environment}</p>
-                </div>
-              </div>
-              <div className="p-4 rounded-lg bg-[var(--night-lighter)]">
-                <p className="text-xs text-[var(--lavender-muted)] mb-1">Provider/Channel</p>
-                <p className="capitalize font-medium text-[var(--lavender)]">{selectedSecret.providerOrChannel}</p>
-              </div>
-              <div className="p-4 rounded-lg bg-[var(--night-lighter)]">
-                <p className="text-xs text-[var(--lavender-muted)] mb-1">Purpose</p>
-                <p className="text-[var(--lavender)]">{selectedSecret.purpose}</p>
-              </div>
-              <div className="p-4 rounded-lg bg-[var(--night-lighter)]">
-                <p className="text-xs text-[var(--lavender-muted)] mb-1">Secret Reference</p>
-                <p className="font-mono text-sm text-[var(--dim-gray)]">{selectedSecret.id}</p>
-                <p className="text-xs text-[var(--lavender-muted)] mt-2">
-                  <AlertCircle className="h-3 w-3 inline mr-1" />
-                  Actual secret values are encrypted and not displayed
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 rounded-lg bg-[var(--night-lighter)]">
-                  <p className="text-xs text-[var(--lavender-muted)]">Last Rotated</p>
-                  <p className="text-[var(--lavender)]">{formatDate(selectedSecret.lastRotatedAt)}</p>
-                </div>
-                <div className="p-3 rounded-lg bg-[var(--night-lighter)]">
-                  <p className="text-xs text-[var(--lavender-muted)]">Status</p>
-                  {getStatusBadge(selectedSecret.status)}
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Secret</DialogTitle>
-          </DialogHeader>
-          <div className="p-8 text-center">
-            <Lock className="h-12 w-12 text-[var(--tropical-indigo)] mx-auto mb-4" />
-            <p className="text-[var(--lavender)] mb-2">Add New Secret</p>
-            <p className="text-sm text-[var(--lavender-muted)]">
-              This would open a form to create a new secret reference with assistant binding.
-            </p>
+          <div className="p-4">
+            <p className="text-[var(--lavender-muted)]">Secret details will be shown here.</p>
           </div>
         </DialogContent>
       </Dialog>
