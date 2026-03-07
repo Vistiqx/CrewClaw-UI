@@ -1327,7 +1327,7 @@ export function getAllTeams(): any[] {
 
 export function getTeamById(id: string): any | undefined {
   const db = getDb();
-  const team = db.prepare(`
+  const team: any = db.prepare(`
     SELECT t.*, b.name as business_name,
            a1.name as advisor_name,
            a2.name as orchestrator_name
@@ -1365,7 +1365,7 @@ export function getAllCouncils(): any[] {
 
 export function getCouncilById(id: string): any | undefined {
   const db = getDb();
-  const council = db.prepare(`
+  const council: any = db.prepare(`
     SELECT c.*, b.name as business_name,
            a.name as lead_assistant_name
     FROM councils c
